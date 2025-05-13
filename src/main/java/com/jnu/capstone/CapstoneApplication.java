@@ -20,7 +20,7 @@ public class CapstoneApplication {
 			User user = new User();
 			user.setUserId(1);
 			user.setEmail("test@example.com");
-			user.setPassword("pass123");
+			user.setPword("pass123");
 			user.setNickname("tester");
 			user.setCampus("전남대학교");
 			user.setDepartment("인공지능학부");
