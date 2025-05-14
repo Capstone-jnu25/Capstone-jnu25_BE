@@ -13,6 +13,9 @@ public class Post {
     @Column(nullable = false, length = 40)
     private String title;
 
+    @Column(nullable = false, length = 1000)  // 게시글 내용 필드 추가
+    private String contents;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private BoardType boardType;
@@ -42,6 +45,8 @@ public class Post {
     public void setPostId(int postId) { this.postId = postId; }
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
+    public String getContents() { return contents; }
+    public void setContents(String contents) { this.contents = contents; }
     public BoardType getBoardType() { return boardType; }
     public void setBoardType(BoardType boardType) { this.boardType = boardType; }
     public int getUserId() { return userId; }
