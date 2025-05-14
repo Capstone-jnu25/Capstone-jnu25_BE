@@ -36,6 +36,7 @@ public class GatheringBoard {
     private BoardType boardType;
 
     @OneToOne
+    @MapsId
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
@@ -59,5 +60,8 @@ public class GatheringBoard {
     public BoardType getBoardType() { return boardType; }
     public void setBoardType(BoardType boardType) { this.boardType = boardType; }
     public Post getPost() { return post; }
-    public void setPost(Post post) { this.post = post; }
+    public void setPost(Post post) {
+        this.post = post;
+        this.postId = post.getPostId(); // 외래키 설정
+    }
 }
