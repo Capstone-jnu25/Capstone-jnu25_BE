@@ -1,47 +1,45 @@
 package com.jnu.capstone.dto;
 
 import java.time.LocalDate;
-import java.time.Period;
 
-// 게시글 목록 조회 DTO
-public class PostListResponseDto {
+// 게시글 통합 응답 DTO
+public class PostResponseDto {
     private int postId;
     private String title;
+    private String contents;
     private String place;
+    private String time;
+    private LocalDate dueDate;
     private String gender;
     private int maxParticipants;
     private int currentParticipants;
-    private LocalDate dueDate;
     private String boardType;
     private boolean isClosed;
-    private long dDay;  // 추가 필드
+    private long dDay;
 
     // 기본 생성자
-    public PostListResponseDto() {}
+    public PostResponseDto() {}
 
-    // 전체 필드 초기화
-    public PostListResponseDto(int postId, String title, String place, String gender, int maxParticipants, int currentParticipants, LocalDate dueDate, String boardType, boolean isClosed) {
+    // 전체 필드 초기화 (dDay 포함)
+    public PostResponseDto(int postId, String title, String contents, String place, String time, LocalDate dueDate, String gender, int maxParticipants, int currentParticipants, String boardType, boolean isClosed, long dDay) {
         this.postId = postId;
         this.title = title;
+        this.contents = contents;
         this.place = place;
+        this.time = time;
+        this.dueDate = dueDate;
         this.gender = gender;
         this.maxParticipants = maxParticipants;
         this.currentParticipants = currentParticipants;
-        this.dueDate = dueDate;
         this.boardType = boardType;
         this.isClosed = isClosed;
-        this.dDay = calculateDDay(dueDate);
-    }
-
-    // 추가 생성자 - 마감 여부 계산 포함
-    public PostListResponseDto(int postId, String title, String place, String gender, int maxParticipants, int currentParticipants, LocalDate dueDate, String boardType) {
-        this(postId, title, place, gender, maxParticipants, currentParticipants, dueDate, boardType, currentParticipants >= maxParticipants || dueDate.isBefore(LocalDate.now()));
+        this.dDay = dDay;
     }
 
     // D-Day 계산 메서드
     private long calculateDDay(LocalDate dueDate) {
         LocalDate today = LocalDate.now();
-        return today.until(dueDate).getDays();
+        return Math.max(0, today.until(dueDate).getDays());
     }
 
     // Getters and Setters
@@ -51,8 +49,20 @@ public class PostListResponseDto {
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
 
+    public String getContents() { return contents; }
+    public void setContents(String contents) { this.contents = contents; }
+
     public String getPlace() { return place; }
     public void setPlace(String place) { this.place = place; }
+
+    public String getTime() { return time; }
+    public void setTime(String time) { this.time = time; }
+
+    public LocalDate getDueDate() { return dueDate; }
+    public void setDueDate(LocalDate dueDate) {
+        this.dueDate = dueDate;
+        this.dDay = calculateDDay(dueDate);
+    }
 
     public String getGender() { return gender; }
     public void setGender(String gender) { this.gender = gender; }
@@ -62,12 +72,6 @@ public class PostListResponseDto {
 
     public int getCurrentParticipants() { return currentParticipants; }
     public void setCurrentParticipants(int currentParticipants) { this.currentParticipants = currentParticipants; }
-
-    public LocalDate getDueDate() { return dueDate; }
-    public void setDueDate(LocalDate dueDate) {
-        this.dueDate = dueDate;
-        this.dDay = calculateDDay(dueDate);  // dDay 필드 업데이트
-    }
 
     public String getBoardType() { return boardType; }
     public void setBoardType(String boardType) { this.boardType = boardType; }
