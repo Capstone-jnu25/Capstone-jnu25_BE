@@ -2,7 +2,9 @@ package com.jnu.capstone.service;
 
 import java.time.LocalDate;
 import com.jnu.capstone.dto.PostResponseDto;
+import com.jnu.capstone.dto.GatheringDetailResponseDto;
 import com.jnu.capstone.entity.BoardType;
+import com.jnu.capstone.entity.GatheringBoard;
 import com.jnu.capstone.repository.GatheringBoardRepository;
 import com.jnu.capstone.repository.ApplicantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +67,28 @@ public class GatheringService {
                             dDay
                     );
                 });
+    }
+
+    public GatheringDetailResponseDto getGatheringDetail(int postId) {
+        GatheringBoard gatheringBoard = gatheringBoardRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+
+        long dDay = Math.max(0, LocalDate.now().until(gatheringBoard.getDueDate()).getDays());
+        String dDayText = dDay == 0 ? "D-DAY" : "D-" + dDay;
+
+        boolean isClosed = gatheringBoard.getDueDate().isBefore(LocalDate.now()) ||
+                (gatheringBoard.isAutomatic() && gatheringBoard.getMaxParticipants() <= gatheringBoard.getCurrentParticipants());
+
+        return new GatheringDetailResponseDto(
+                gatheringBoard.getPost().getPostId(),
+                gatheringBoard.getPost().getTitle(),
+                dDayText,
+                gatheringBoard.getPost().getContents(),
+                gatheringBoard.getPlace(),
+                gatheringBoard.getGender().toString(),
+                gatheringBoard.getMeetTime(),
+                isClosed
+        );
     }
 }
 

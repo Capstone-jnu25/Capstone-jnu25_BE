@@ -1,6 +1,7 @@
 package com.jnu.capstone.controller;
 
 import com.jnu.capstone.dto.PostResponseDto;
+import com.jnu.capstone.dto.GatheringDetailResponseDto;
 import com.jnu.capstone.service.GatheringService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -30,5 +31,11 @@ public class GatheringController {
 
         // 응답 형식 맞추기
         return ResponseEntity.ok().body(posts);
+    }
+
+    @GetMapping("/{postId}")
+    public ResponseEntity<?> getGatheringDetail(@PathVariable int postId) {
+        GatheringDetailResponseDto responseDto = gatheringService.getGatheringDetail(postId);
+        return ResponseEntity.ok().body(responseDto);
     }
 }
