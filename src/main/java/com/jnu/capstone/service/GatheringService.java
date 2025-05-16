@@ -29,23 +29,19 @@ public class GatheringService {
         return gatheringBoardRepository.findByBoardType(type, pageable)
                 .map(gatheringBoard -> {
                     LocalDate dueDate = gatheringBoard.getDueDate();
-                    long dDay = Math.max(0, dueDate.toEpochDay() - LocalDate.now().toEpochDay());
+
+                    // D-Day 계산
+                    long dDay = Math.max(0, LocalDate.now().until(dueDate).getDays());
+                    String dDayText = dDay == 0 ? "D-DAY" : "D-" + dDay;
 
                     // 마감 조건
                     boolean isClosed = false;
 
-                    // 1. 마감일이 지난 경우
                     if (dueDate.isBefore(LocalDate.now())) {
-                        isClosed = true;
-                    }
-
-                    // 2. 자동 수락 (automatic = true)
-                    else if (gatheringBoard.isAutomatic() && gatheringBoard.getCurrentParticipants() >= gatheringBoard.getMaxParticipants()) {
-                        isClosed = true;
-                    }
-
-                    // 3. 수동 수락 (automatic = false)
-                    else if (!gatheringBoard.isAutomatic()) {
+                        isClosed = true; // 1. 마감일이 지난 경우
+                    } else if (gatheringBoard.isAutomatic() && gatheringBoard.getCurrentParticipants() >= gatheringBoard.getMaxParticipants()) {
+                        isClosed = true; // 2. 자동 수락 (automatic = true)
+                    } else if (!gatheringBoard.isAutomatic()) { // 3. 수동 수락 (automatic = false)
                         int acceptedCount = (int) applicantRepository.countByPostAndIsAccepted(gatheringBoard.getPost(), true);
                         if (acceptedCount >= gatheringBoard.getMaxParticipants()) {
                             isClosed = true;
@@ -64,7 +60,7 @@ public class GatheringService {
                             gatheringBoard.getCurrentParticipants(),
                             gatheringBoard.getBoardType().toString(),
                             isClosed,
-                            dDay
+                            dDayText
                     );
                 });
     }

@@ -15,13 +15,13 @@ public class PostResponseDto {
     private int currentParticipants;
     private String boardType;
     private boolean isClosed;
-    private long dDay;
+    private String dDay;
 
     // 기본 생성자
     public PostResponseDto() {}
 
     // 전체 필드 초기화 (dDay 포함)
-    public PostResponseDto(int postId, String title, String contents, String place, String time, LocalDate dueDate, String gender, int maxParticipants, int currentParticipants, String boardType, boolean isClosed, long dDay) {
+    public PostResponseDto(int postId, String title, String contents, String place, String time, LocalDate dueDate, String gender, int maxParticipants, int currentParticipants, String boardType, boolean isClosed, String dDay) {
         this.postId = postId;
         this.title = title;
         this.contents = contents;
@@ -37,9 +37,10 @@ public class PostResponseDto {
     }
 
     // D-Day 계산 메서드
-    private long calculateDDay(LocalDate dueDate) {
+    public static String calculateDDay(LocalDate dueDate) {
         LocalDate today = LocalDate.now();
-        return Math.max(0, today.until(dueDate).getDays());
+        long daysLeft = Math.max(0, today.until(dueDate).getDays());
+        return daysLeft == 0 ? "D-DAY" : "D-" + daysLeft;
     }
 
     // Getters and Setters
@@ -79,6 +80,6 @@ public class PostResponseDto {
     public boolean isClosed() { return isClosed; }
     public void setClosed(boolean closed) { this.isClosed = closed; }
 
-    public long getDDay() { return dDay; }
-    public void setDDay(long dDay) { this.dDay = dDay; }
+    public String getDDay() { return dDay; }
+    public void setDDay(String dDay) { this.dDay = dDay; }
 }
