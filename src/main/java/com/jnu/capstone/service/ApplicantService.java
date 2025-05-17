@@ -72,6 +72,11 @@ public class ApplicantService {
             throw new IllegalArgumentException("이미 지원한 게시글입니다.");
         }
 
+        // 모집이 마감되었는지 확인
+        if (gatheringBoard.getCurrentParticipants() >= gatheringBoard.getMaxParticipants()) {
+            throw new IllegalArgumentException("모집이 마감된 게시글입니다.");
+        }
+
         // 지원자 객체 생성
         Applicant applicant = new Applicant();
         applicant.setPost(gatheringBoard.getPost());
@@ -82,7 +87,14 @@ public class ApplicantService {
             applicant.setApplicationText(applicationText);
         }
 
+        // 자동 수락 처리
+        if (gatheringBoard.isAutomatic()) {
+            applicant.setAccepted(true);
+            gatheringBoard.setCurrentParticipants(gatheringBoard.getCurrentParticipants() + 1);
+        }
+
         // DB에 저장
         applicantRepository.save(applicant);
+        gatheringBoardRepository.save(gatheringBoard);
     }
 }
