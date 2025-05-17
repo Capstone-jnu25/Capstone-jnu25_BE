@@ -27,6 +27,7 @@ public class ApplicantService {
     @Autowired
     private UserRepository userRepository;
 
+    @Transactional(readOnly = true)
     public Page<?> getApplicants(int postId, Pageable pageable) {
         // 게시글 찾기
         GatheringBoard gatheringBoard = gatheringBoardRepository.findById(postId)
@@ -38,17 +39,19 @@ public class ApplicantService {
         // 스터디 게시글
         if (boardType == BoardType.STUDY) {
             return applicantRepository.findByPost_PostIdAndPost_BoardType(postId, boardType, pageable)
-                    .map(ApplicantResponseDto::fromEntity);
-        }
-
-        // 번개 게시글
-        else if (boardType == BoardType.MEETUP) {
+                    .map(applicant -> {
+                        // User 엔티티를 초기화하여 LazyInitializationException 방지
+                        applicant.getUser().getNickname();
+                        return ApplicantResponseDto.fromEntity(applicant);
+                    });
+        } else if (boardType == BoardType.MEETUP) {
             return applicantRepository.findByPost_PostIdAndPost_BoardType(postId, boardType, pageable)
-                    .map(ApplicantSimpleResponseDto::fromEntity);
-        }
-
-        // 그 외 게시판 (예외 처리)
-        else {
+                    .map(applicant -> {
+                        // User 엔티티를 초기화하여 LazyInitializationException 방지
+                        applicant.getUser().getNickname();
+                        return ApplicantSimpleResponseDto.fromEntity(applicant);
+                    });
+        } else {
             throw new IllegalArgumentException("지원자 목록은 스터디와 번개 모임 게시판에서만 조회할 수 있습니다.");
         }
     }
