@@ -29,7 +29,15 @@ public class ApplicantController {
         // 응답 데이터 생성
         Map<String, Object> response = Map.of(
                 "status", "success",
-                "data", applicants
+                "data", Map.of(
+                        "content", applicants.getContent(),
+                        "pageNumber", applicants.getNumber(),
+                        "pageSize", applicants.getSize(),
+                        "totalElements", applicants.getTotalElements(),
+                        "totalPages", applicants.getTotalPages(),
+                        "last", applicants.isLast(),
+                        "first", applicants.isFirst()
+                )
         );
 
         return ResponseEntity.ok(response);
