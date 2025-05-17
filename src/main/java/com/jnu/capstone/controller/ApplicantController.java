@@ -4,10 +4,10 @@ import com.jnu.capstone.service.ApplicantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.Map;
 
 @RestController
@@ -23,8 +23,16 @@ public class ApplicantController {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size
     ) {
-        Page<?> applicants = applicantService.getApplicants(postId, PageRequest.of(page, size));
-        return ResponseEntity.ok().body(applicants);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<?> applicants = applicantService.getApplicants(postId, pageable);
+
+        // 응답 데이터 생성
+        Map<String, Object> response = Map.of(
+                "status", "success",
+                "data", applicants
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/{postId}/apply")
