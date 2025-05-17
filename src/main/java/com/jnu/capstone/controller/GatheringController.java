@@ -31,14 +31,24 @@ public class GatheringController {
         // 서비스 호출
         Page<PostResponseDto> posts = gatheringService.getGatheringPosts(boardType, pageable);
 
-        // 응답 형식 맞추기
-        return ResponseEntity.ok().body(posts);
+        Map<String, Object> response = Map.of(
+                "status", "success",
+                "data", posts
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{postId}")
     public ResponseEntity<?> getGatheringDetail(@PathVariable int postId) {
         GatheringDetailResponseDto responseDto = gatheringService.getGatheringDetail(postId);
-        return ResponseEntity.ok().body(responseDto);
+        Map<String, Object> response = Map.of(
+                "status", "success",
+                "data", responseDto
+        );
+
+        return ResponseEntity.ok(response);
+
     }
 
     @PostMapping
