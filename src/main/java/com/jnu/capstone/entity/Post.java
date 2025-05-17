@@ -13,18 +13,12 @@ public class Post {
     @Column(nullable = false, length = 40)
     private String title;
 
-    @Column(nullable = false, length = 1000)  // 게시글 내용 필드 추가
+    @Column(nullable = false, length = 1000)
     private String contents;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private BoardType boardType;
-
-    @Column(name = "user_id", nullable = false, insertable = false, updatable = false)
-    private int userId;
-
-    @Column(name = "campus_id", nullable = false, insertable = false, updatable = false)
-    private int campusId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -43,26 +37,28 @@ public class Post {
     // Getters and Setters
     public int getPostId() { return postId; }
     public void setPostId(int postId) { this.postId = postId; }
+
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
+
     public String getContents() { return contents; }
     public void setContents(String contents) { this.contents = contents; }
+
     public BoardType getBoardType() { return boardType; }
     public void setBoardType(BoardType boardType) { this.boardType = boardType; }
-    public int getUserId() { return userId; }
-    public int getCampusId() { return campusId; }
+
     public User getUser() { return user; }
-    public void setUser(User user) {
-        this.user = user;
-        this.userId = user.getUserId(); // 연관된 엔티티의 ID 설정
-    }
+    public void setUser(User user) { this.user = user; }
+
     public School getCampus() { return campus; }
-    public void setCampus(School campus) {
-        this.campus = campus;
-        this.campusId = campus.getCampusId(); // 연관된 엔티티의 ID 설정
-    }
+    public void setCampus(School campus) { this.campus = campus; }
+
     public List<Applicant> getApplicants() { return applicants; }
     public void setApplicants(List<Applicant> applicants) { this.applicants = applicants; }
+
     public GatheringBoard getGatheringBoard() { return gatheringBoard; }
-    public void setGatheringBoard(GatheringBoard gatheringBoard) { this.gatheringBoard = gatheringBoard; }
+    public void setGatheringBoard(GatheringBoard gatheringBoard) {
+        this.gatheringBoard = gatheringBoard;
+        gatheringBoard.setPost(this); // 양방향 연관관계 설정
+    }
 }

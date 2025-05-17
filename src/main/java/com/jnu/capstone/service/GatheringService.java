@@ -1,25 +1,34 @@
 package com.jnu.capstone.service;
 
 import java.time.LocalDate;
+import com.jnu.capstone.dto.PostCreateRequestDto;
 import com.jnu.capstone.dto.PostResponseDto;
 import com.jnu.capstone.dto.GatheringDetailResponseDto;
 import com.jnu.capstone.entity.BoardType;
 import com.jnu.capstone.entity.GatheringBoard;
+import com.jnu.capstone.entity.GenderType;
+import com.jnu.capstone.entity.Post;
+import com.jnu.capstone.entity.User;
 import com.jnu.capstone.repository.GatheringBoardRepository;
+import com.jnu.capstone.repository.PostRepository;
+import com.jnu.capstone.repository.UserRepository;
 import com.jnu.capstone.repository.ApplicantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class GatheringService {
-
     @Autowired
     private GatheringBoardRepository gatheringBoardRepository;
-
     @Autowired
     private ApplicantRepository applicantRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private PostRepository postRepository;
 
     public Page<PostResponseDto> getGatheringPosts(String boardType, Pageable pageable) {
         // String -> Enum 변환
@@ -86,5 +95,53 @@ public class GatheringService {
                 isClosed
         );
     }
-}
 
+    @Transactional
+    public int createGathering(int userId, PostCreateRequestDto requestDto) {
+        // 유저 찾기
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
+
+        // 게시글 타입이 null인지 확인
+        String boardTypeStr = requestDto.getBoardType();
+        if (boardTypeStr == null || boardTypeStr.trim().isEmpty()) {
+            throw new IllegalArgumentException("게시판 유형(board_type)은 필수입니다.");
+        }
+
+        // 게시판 타입 변환
+        BoardType boardType;
+        try {
+            boardType = BoardType.valueOf(boardTypeStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("유효하지 않은 게시판 유형입니다. (예: STUDY, MEETUP)");
+        }
+
+        //게시글 생성
+        Post post = new Post();
+        post.setUser(user);
+        post.setTitle(requestDto.getTitle());
+        post.setContents(requestDto.getContents() != null ? requestDto.getContents() : "");
+        post.setBoardType(boardType);
+        post.setCampus(user.getCampus());
+
+        //모집 게시글 생성 (Post와 연관 설정)
+        GatheringBoard gatheringBoard = new GatheringBoard();
+        gatheringBoard.setPlace(requestDto.getPlace());
+        gatheringBoard.setMeetTime(requestDto.getTime());
+        gatheringBoard.setDueDate(requestDto.getDueDate());
+        gatheringBoard.setGender(GenderType.valueOf(requestDto.getGender().toUpperCase()));
+        gatheringBoard.setMaxParticipants(requestDto.getMaxParticipants());
+        gatheringBoard.setAutomatic(requestDto.isAutomatic());
+        gatheringBoard.setCurrentParticipants(0);
+        gatheringBoard.setBoardType(boardType);
+
+        //양방향 연관관계 설정
+        post.setGatheringBoard(gatheringBoard);
+        gatheringBoard.setPost(post);
+
+        postRepository.save(post);
+
+
+        return post.getPostId();
+    }
+}

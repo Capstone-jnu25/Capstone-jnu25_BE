@@ -1,5 +1,6 @@
 package com.jnu.capstone.controller;
 
+import com.jnu.capstone.dto.PostCreateRequestDto;
 import com.jnu.capstone.dto.PostResponseDto;
 import com.jnu.capstone.dto.GatheringDetailResponseDto;
 import com.jnu.capstone.service.GatheringService;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 @RestController
 @RequestMapping("/api/gathering")
 public class GatheringController {
@@ -37,5 +39,25 @@ public class GatheringController {
     public ResponseEntity<?> getGatheringDetail(@PathVariable int postId) {
         GatheringDetailResponseDto responseDto = gatheringService.getGatheringDetail(postId);
         return ResponseEntity.ok().body(responseDto);
+    }
+
+    @PostMapping
+    public ResponseEntity<?> createGathering(
+            @RequestHeader("User-Id") int userId,
+            @RequestBody PostCreateRequestDto requestDto
+    ) {
+        try {
+            int postId = gatheringService.createGathering(userId, requestDto);
+
+            return ResponseEntity.ok(Map.of(
+                    "status", "success",
+                    "data", Map.of("post_id", postId)
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "status", "error",
+                    "message", e.getMessage()
+            ));
+        }
     }
 }
