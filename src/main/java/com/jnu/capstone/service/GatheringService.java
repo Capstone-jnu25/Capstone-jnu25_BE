@@ -9,10 +9,12 @@ import com.jnu.capstone.entity.GatheringBoard;
 import com.jnu.capstone.entity.GenderType;
 import com.jnu.capstone.entity.Post;
 import com.jnu.capstone.entity.User;
+import com.jnu.capstone.entity.Chatroom;
 import com.jnu.capstone.repository.GatheringBoardRepository;
 import com.jnu.capstone.repository.PostRepository;
 import com.jnu.capstone.repository.UserRepository;
 import com.jnu.capstone.repository.ApplicantRepository;
+import com.jnu.capstone.repository.ChatroomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +31,8 @@ public class GatheringService {
     private UserRepository userRepository;
     @Autowired
     private PostRepository postRepository;
+    @Autowired
+    private ChatroomRepository chatroomRepository;
 
     public Page<PostResponseDto> getGatheringPosts(String boardType, Pageable pageable) {
         // String -> Enum 변환
@@ -141,6 +145,11 @@ public class GatheringService {
 
         postRepository.save(post);
 
+        // 채팅방 생성 (게시글과 연관 설정)
+        Chatroom chatroom = new Chatroom();
+        chatroom.setPost(post);
+        chatroom.setChatTitle(post.getTitle());
+        chatroomRepository.save(chatroom);
 
         return post.getPostId();
     }
