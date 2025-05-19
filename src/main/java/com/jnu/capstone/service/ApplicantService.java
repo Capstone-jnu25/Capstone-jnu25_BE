@@ -107,18 +107,13 @@ public class ApplicantService {
     }
 
     @Transactional
-    public void acceptApplicant(int postId, int applicantId, int userId) {
+    public void acceptApplicant(int applicantId, int userId) {
         // 지원자 찾기
         Applicant applicant = applicantRepository.findById(applicantId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 지원자가 존재하지 않습니다."));
 
-        // 게시글 확인
+        // 게시글 작성자 확인
         Post post = applicant.getPost();
-        if (post.getPostId() != postId) {
-            throw new IllegalArgumentException("지원자가 해당 게시글의 신청자가 아닙니다.");
-        }
-
-        // 게시글 작성자 확인 (User-Id 헤더)
         if (post.getUser().getUserId() != userId) {
             throw new IllegalArgumentException("게시글 작성자만 지원자를 수락할 수 있습니다.");
         }
@@ -133,7 +128,7 @@ public class ApplicantService {
         applicantRepository.save(applicant);
 
         // 채팅방 ID 찾기
-        Chatroom chatroom = chatroomRepository.findByPost_PostId(postId)
+        Chatroom chatroom = chatroomRepository.findByPost_PostId(post.getPostId())
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글에 대한 채팅방이 존재하지 않습니다."));
 
         // chat_join 테이블에 추가
@@ -147,18 +142,13 @@ public class ApplicantService {
     }
 
     @Transactional
-    public void deleteApplicant(int postId, int applicantId, int userId) {
+    public void deleteApplicant(int applicantId, int userId) {
         // 지원자 찾기
         Applicant applicant = applicantRepository.findById(applicantId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 지원자가 존재하지 않습니다."));
 
-        // 게시글 확인
+        // 게시글 작성자 확인
         Post post = applicant.getPost();
-        if (post.getPostId() != postId) {
-            throw new IllegalArgumentException("지원자가 해당 게시글의 신청자가 아닙니다.");
-        }
-
-        // 게시글 작성자 확인 (User-Id 헤더)
         if (post.getUser().getUserId() != userId) {
             throw new IllegalArgumentException("게시글 작성자만 지원자를 삭제할 수 있습니다.");
         }
