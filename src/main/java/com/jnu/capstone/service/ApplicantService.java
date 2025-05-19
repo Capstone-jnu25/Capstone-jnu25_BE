@@ -4,11 +4,15 @@ import com.jnu.capstone.dto.ApplicantResponseDto;
 import com.jnu.capstone.dto.ApplicantSimpleResponseDto;
 import com.jnu.capstone.entity.Applicant;
 import com.jnu.capstone.entity.BoardType;
+import com.jnu.capstone.entity.ChatJoin;
+import com.jnu.capstone.entity.Chatroom;
 import com.jnu.capstone.entity.GatheringBoard;
 import com.jnu.capstone.entity.Post;
 import com.jnu.capstone.entity.User;
 import com.jnu.capstone.repository.ApplicantRepository;
 import com.jnu.capstone.repository.GatheringBoardRepository;
+import com.jnu.capstone.repository.ChatroomRepository;
+import com.jnu.capstone.repository.ChatJoinRepository;
 import com.jnu.capstone.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -26,6 +30,10 @@ public class ApplicantService {
     private GatheringBoardRepository gatheringBoardRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ChatJoinRepository chatJoinRepository;
+    @Autowired
+    private ChatroomRepository chatroomRepository;
 
     @Transactional(readOnly = true)
     public Page<?> getApplicants(int postId, Pageable pageable) {
@@ -96,5 +104,45 @@ public class ApplicantService {
         // DB에 저장
         applicantRepository.save(applicant);
         gatheringBoardRepository.save(gatheringBoard);
+    }
+
+    @Transactional
+    public void acceptApplicant(int postId, int applicantId, int userId) {
+        // 지원자 찾기
+        Applicant applicant = applicantRepository.findById(applicantId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 지원자가 존재하지 않습니다."));
+
+        // 게시글 확인
+        Post post = applicant.getPost();
+        if (post.getPostId() != postId) {
+            throw new IllegalArgumentException("지원자가 해당 게시글의 신청자가 아닙니다.");
+        }
+
+        // 게시글 작성자 확인 (User-Id 헤더)
+        if (post.getUser().getUserId() != userId) {
+            throw new IllegalArgumentException("게시글 작성자만 지원자를 수락할 수 있습니다.");
+        }
+
+        // 이미 수락된 지원자인지 확인
+        if (applicant.isAccepted()) {
+            throw new IllegalArgumentException("해당 지원자는 이미 수락되었습니다.");
+        }
+
+        // 지원자 수락 처리
+        applicant.setAccepted(true);
+        applicantRepository.save(applicant);
+
+        // 채팅방 ID 찾기
+        Chatroom chatroom = chatroomRepository.findByPost_PostId(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글에 대한 채팅방이 존재하지 않습니다."));
+
+        // chat_join 테이블에 추가
+        ChatJoin chatJoin = new ChatJoin();
+        chatJoin.setUser_id(applicant.getUser().getUserId());
+        chatJoin.setChatting_room_id(chatroom.getChattingRoomId());
+        chatJoinRepository.save(chatJoin);
+
+        GatheringBoard gatheringBoard = post.getGatheringBoard();
+        gatheringBoard.setCurrentParticipants(gatheringBoard.getCurrentParticipants() + 1);
     }
 }

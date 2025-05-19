@@ -80,4 +80,24 @@ public class ApplicantController {
             ));
         }
     }
+
+    @PostMapping("/{postId}/applicants/{applicantId}/accept")
+    public ResponseEntity<?> acceptApplicant(
+            @PathVariable int postId,
+            @PathVariable int applicantId,
+            @RequestHeader("User-Id") int userId
+    ) {
+        try {
+            applicantService.acceptApplicant(postId, applicantId, userId);
+            return ResponseEntity.ok(Map.of(
+                    "status", "success",
+                    "message", "지원자가 수락되었습니다. 채팅방에 초대 완료."
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "status", "error",
+                    "message", e.getMessage()
+            ));
+        }
+    }
 }
