@@ -100,4 +100,24 @@ public class ApplicantController {
             ));
         }
     }
+
+    @DeleteMapping("/{postId}/applicants/{applicantId}")
+    public ResponseEntity<?> deleteApplicant(
+            @PathVariable int postId,
+            @PathVariable int applicantId,
+            @RequestHeader("User-Id") int userId
+    ) {
+        try {
+            applicantService.deleteApplicant(postId, applicantId, userId);
+            return ResponseEntity.ok(Map.of(
+                    "status", "success",
+                    "message", "지원자가 삭제되었습니다."
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "status", "error",
+                    "message", e.getMessage()
+            ));
+        }
+    }
 }
