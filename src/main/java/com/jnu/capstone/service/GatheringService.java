@@ -10,11 +10,13 @@ import com.jnu.capstone.entity.GenderType;
 import com.jnu.capstone.entity.Post;
 import com.jnu.capstone.entity.User;
 import com.jnu.capstone.entity.Chatroom;
+import com.jnu.capstone.entity.ChatJoin;
 import com.jnu.capstone.repository.GatheringBoardRepository;
 import com.jnu.capstone.repository.PostRepository;
 import com.jnu.capstone.repository.UserRepository;
 import com.jnu.capstone.repository.ApplicantRepository;
 import com.jnu.capstone.repository.ChatroomRepository;
+import com.jnu.capstone.repository.ChatJoinRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,7 +35,8 @@ public class GatheringService {
     private PostRepository postRepository;
     @Autowired
     private ChatroomRepository chatroomRepository;
-
+    @Autowired
+    private ChatJoinRepository chatJoinRepository;
     public Page<PostResponseDto> getGatheringPosts(String boardType, Pageable pageable) {
         // String -> Enum 변환
         BoardType type = BoardType.valueOf(boardType.toUpperCase());
@@ -150,6 +153,12 @@ public class GatheringService {
         chatroom.setPost(post);
         chatroom.setChatTitle(post.getTitle());
         chatroomRepository.save(chatroom);
+
+        // 작성자 자동 채팅방 참여 (chat_join 테이블)
+        ChatJoin chatJoin = new ChatJoin();
+        chatJoin.setUser_id(user.getUserId());
+        chatJoin.setChatting_room_id(chatroom.getChattingRoomId());
+        chatJoinRepository.save(chatJoin);
 
         return post.getPostId();
     }
