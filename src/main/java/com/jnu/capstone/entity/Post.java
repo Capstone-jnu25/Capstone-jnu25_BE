@@ -13,8 +13,8 @@ public class Post {
     @Column(nullable = false, length = 40)
     private String title;
 
-    @Column(nullable = false, length = 1000)
-    private String contents;
+    @Column(nullable = false, length = 1000, columnDefinition = "VARCHAR(1000) DEFAULT ''")
+    private String contents = "";
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
