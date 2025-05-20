@@ -133,8 +133,8 @@ public class ApplicantService {
 
         // chat_join 테이블에 추가
         ChatJoin chatJoin = new ChatJoin();
-        chatJoin.setUser_id(applicant.getUser().getUserId());
-        chatJoin.setChatting_room_id(chatroom.getChattingRoomId());
+        chatJoin.setUserId(applicant.getUser().getUserId());
+        chatJoin.setChattingRoomId(chatroom.getChattingRoomId());
         chatJoinRepository.save(chatJoin);
 
         GatheringBoard gatheringBoard = post.getGatheringBoard();

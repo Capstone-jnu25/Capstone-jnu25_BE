@@ -156,8 +156,8 @@ public class GatheringService {
 
         // 작성자 자동 채팅방 참여 (chat_join 테이블)
         ChatJoin chatJoin = new ChatJoin();
-        chatJoin.setUser_id(user.getUserId());
-        chatJoin.setChatting_room_id(chatroom.getChattingRoomId());
+        chatJoin.setUserId(user.getUserId());
+        chatJoin.setChattingRoomId(chatroom.getChattingRoomId());
         chatJoinRepository.save(chatJoin);
 
         return post.getPostId();

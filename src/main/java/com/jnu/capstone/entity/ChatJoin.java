@@ -11,17 +11,17 @@ public class ChatJoin implements Serializable {
 
     @Id
     @Column(name = "user_id")
-    private int user_id;
+    private int userId;
 
     @Id
-    @Column(name = "chatting_room_id")  // 필드명 수정
-    private int chatting_room_id;
+    @Column(name = "chatting_room_id")
+    private int chattingRoomId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)  // Lazy -> Eager로 수정
     @JoinColumn(name = "user_id", insertable = false, updatable = false, nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)  // Lazy -> Eager로 수정
     @JoinColumn(name = "chatting_room_id", insertable = false, updatable = false, nullable = false)
     private Chatroom chatroom;
 
@@ -29,26 +29,26 @@ public class ChatJoin implements Serializable {
     public ChatJoin() {}
 
     // 생성자
-    public ChatJoin(int user_id, int chatting_room_id) {
-        this.user_id = user_id;
-        this.chatting_room_id = chatting_room_id;
+    public ChatJoin(int userId, int chattingRoomId) {
+        this.userId = userId;
+        this.chattingRoomId = chattingRoomId;
     }
 
     // Getter and Setter
-    public int getUser_id() {
-        return user_id;
+    public int getUserId() {
+        return userId;
     }
 
-    public void setUser_id(int user_id) {
-        this.user_id = user_id;
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
-    public int getChatting_room_id() {
-        return chatting_room_id;
+    public int getChattingRoomId() {
+        return chattingRoomId;
     }
 
-    public void setChatting_room_id(int chatting_room_id) {
-        this.chatting_room_id = chatting_room_id;
+    public void setChattingRoomId(int chattingRoomId) {
+        this.chattingRoomId = chattingRoomId;
     }
 
     public User getUser() {
@@ -57,6 +57,7 @@ public class ChatJoin implements Serializable {
 
     public void setUser(User user) {
         this.user = user;
+        this.userId = user.getUserId();  // 연결된 User의 ID 설정
     }
 
     public Chatroom getChatroom() {
@@ -65,6 +66,7 @@ public class ChatJoin implements Serializable {
 
     public void setChatroom(Chatroom chatroom) {
         this.chatroom = chatroom;
+        this.chattingRoomId = chatroom.getChattingRoomId();  // 연결된 Chatroom의 ID 설정
     }
 
     // equals()와 hashCode() 구현
@@ -73,12 +75,11 @@ public class ChatJoin implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChatJoin that = (ChatJoin) o;
-        return user_id == that.user_id && chatting_room_id == that.chatting_room_id;
+        return userId == that.userId && chattingRoomId == that.chattingRoomId;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(user_id, chatting_room_id);
+        return Objects.hash(userId, chattingRoomId);
     }
 }
-
