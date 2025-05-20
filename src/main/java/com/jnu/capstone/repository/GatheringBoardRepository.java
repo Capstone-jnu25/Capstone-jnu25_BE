@@ -9,5 +9,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface GatheringBoardRepository extends JpaRepository<GatheringBoard, Integer> {
-    Page<GatheringBoard> findByBoardType(BoardType boardType, Pageable pageable);
+    Page<GatheringBoard> findByBoardTypeAndPost_Campus_CampusId(BoardType boardType, int campusId, Pageable pageable);
 }
+

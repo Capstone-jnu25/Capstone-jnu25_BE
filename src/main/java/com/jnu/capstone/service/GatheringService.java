@@ -37,12 +37,17 @@ public class GatheringService {
     private ChatroomRepository chatroomRepository;
     @Autowired
     private ChatJoinRepository chatJoinRepository;
-    public Page<PostResponseDto> getGatheringPosts(String boardType, Pageable pageable) {
+    public Page<PostResponseDto> getGatheringPosts(int userId, String boardType, Pageable pageable) {
         // String -> Enum 변환
         BoardType type = BoardType.valueOf(boardType.toUpperCase());
 
-        // 게시글 목록 조회
-        return gatheringBoardRepository.findByBoardType(type, pageable)
+        // 유저의 학교 정보 가져오기
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
+        int campusId = user.getCampus().getCampusId();
+
+        // 해당 학교의 게시글 목록 조회
+        return gatheringBoardRepository.findByBoardTypeAndPost_Campus_CampusId(type, campusId, pageable)
                 .map(gatheringBoard -> {
                     LocalDate dueDate = gatheringBoard.getDueDate();
 

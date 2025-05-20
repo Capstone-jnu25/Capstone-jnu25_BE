@@ -21,6 +21,7 @@ public class GatheringController {
 
     @GetMapping
     public ResponseEntity<?> getGatheringPosts(
+            @RequestHeader("User-Id") int userId,
             @RequestParam("boardType") String boardType,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size
@@ -29,7 +30,7 @@ public class GatheringController {
         Pageable pageable = PageRequest.of(page, size);
 
         // 서비스 호출
-        Page<PostResponseDto> posts = gatheringService.getGatheringPosts(boardType, pageable);
+        Page<PostResponseDto> posts = gatheringService.getGatheringPosts(userId, boardType, pageable);
 
         Map<String, Object> response = Map.of(
                 "status", "success",
@@ -38,6 +39,7 @@ public class GatheringController {
 
         return ResponseEntity.ok(response);
     }
+
 
     @GetMapping("/{postId}")
     public ResponseEntity<?> getGatheringDetail(@PathVariable int postId) {
