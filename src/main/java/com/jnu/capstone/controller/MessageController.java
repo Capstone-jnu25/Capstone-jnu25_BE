@@ -1,6 +1,7 @@
 package com.jnu.capstone.controller;
 
 import com.jnu.capstone.dto.MessageResponseDto;
+import com.jnu.capstone.dto.ChatMessagesPageResponseDto;
 import com.jnu.capstone.entity.Chatroom;
 import com.jnu.capstone.entity.Message;
 import com.jnu.capstone.entity.User;
@@ -15,9 +16,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/chatrooms")
@@ -33,30 +34,19 @@ public class MessageController {
 
     @Autowired
     private MessageService messageService;
-
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
     @GetMapping("/{chattingRoomId}/messages")
     public ResponseEntity<?> getMessages(
-            @PathVariable int chattingRoomId,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "30") int size
+            @PathVariable Integer chattingRoomId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "30") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<MessageResponseDto> messages = messageService.getMessages(chattingRoomId, pageable);
+        ChatMessagesPageResponseDto chatData = messageService.getMessages(chattingRoomId, pageable);
 
-        // 응답 데이터 생성
-        Map<String, Object> response = Map.of(
+        return ResponseEntity.ok(Map.of(
                 "status", "success",
-                "data", messages.getContent(),
-                "pageNumber", messages.getNumber(),
-                "pageSize", messages.getSize(),
-                "totalElements", messages.getTotalElements(),
-                "totalPages", messages.getTotalPages(),
-                "last", messages.isLast()
-        );
-
-        return ResponseEntity.ok(response);
+                "data", chatData
+        ));
     }
 
     @PostMapping("/{chattingRoomId}/messages")
@@ -95,14 +85,13 @@ public class MessageController {
         Message message = new Message(chatroom, user, detailMessage);
         messageRepository.save(message);
 
-        // WebSocket을 통해 해당 채팅방 구독자에게 메시지 전송
+        // 응답 생성
         MessageResponseDto responseDto = new MessageResponseDto(
                 message.getMessageId(),
                 user.getUserId(),
                 message.getDetailMessage(),
                 message.getSendTime()
         );
-        messagingTemplate.convertAndSend("/topic/chatroom/" + chattingRoomId, responseDto);
 
         return ResponseEntity.ok(Map.of(
                 "status", "success",
