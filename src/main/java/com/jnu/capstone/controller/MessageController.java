@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.util.Map;
 
@@ -33,6 +34,8 @@ public class MessageController {
     @Autowired
     private MessageService messageService;
 
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
     @GetMapping("/{chattingRoomId}/messages")
     public ResponseEntity<?> getMessages(
             @PathVariable int chattingRoomId,
@@ -92,13 +95,14 @@ public class MessageController {
         Message message = new Message(chatroom, user, detailMessage);
         messageRepository.save(message);
 
-        // 응답 생성
+        // WebSocket을 통해 해당 채팅방 구독자에게 메시지 전송
         MessageResponseDto responseDto = new MessageResponseDto(
                 message.getMessageId(),
                 user.getUserId(),
                 message.getDetailMessage(),
                 message.getSendTime()
         );
+        messagingTemplate.convertAndSend("/topic/chatroom/" + chattingRoomId, responseDto);
 
         return ResponseEntity.ok(Map.of(
                 "status", "success",
