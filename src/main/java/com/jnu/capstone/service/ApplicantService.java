@@ -2,6 +2,7 @@ package com.jnu.capstone.service;
 
 import com.jnu.capstone.dto.ApplicantResponseDto;
 import com.jnu.capstone.dto.ApplicantSimpleResponseDto;
+import com.jnu.capstone.dto.GroupDto;
 import com.jnu.capstone.entity.Applicant;
 import com.jnu.capstone.entity.BoardType;
 import com.jnu.capstone.entity.ChatJoin;
@@ -19,6 +20,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ApplicantService {
@@ -155,5 +159,21 @@ public class ApplicantService {
 
         // 지원자 삭제
         applicantRepository.delete(applicant);
+    }
+
+    @Transactional(readOnly = true)
+    public List<GroupDto> getMyGroups(int userId) {
+        List<ChatJoin> chatJoins = chatJoinRepository.findByUserId(userId);
+
+        return chatJoins.stream()
+                .map(ChatJoin::getChatroom)
+                .map(Chatroom::getPost)
+                .filter(post -> post.getBoardType() == BoardType.STUDY || post.getBoardType() == BoardType.MEETUP)
+                .map(post -> new GroupDto(
+                        post.getPostId(),
+                        post.getTitle(),
+                        post.getBoardType().toString()
+                ))
+                .collect(Collectors.toList());
     }
 }
