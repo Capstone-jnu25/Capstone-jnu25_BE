@@ -1,0 +1,25 @@
+server:
+  port: 8080  # 서버 포트 설정 (필요 시)
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/capstone?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: root
+    password: 1234
+  hikari:
+    auto-commit: false
+
+  jpa:
+    hibernate:
+      ddl-auto: update  # 이미 Workbench에서 만든 DB라면 'none' 또는 'validate'
+    show-sql: true
+    open-in-view: false  # LazyInitializationException 방지 (옵션)
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          auto-commit: false  # JDBC 레벨에서 자동 커밋 비활성화
+        cache:
+          use_second_level_cache: false
+          use_query_cache: false
+    timezone: Asia/Seoul

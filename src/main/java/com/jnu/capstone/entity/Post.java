@@ -13,17 +13,21 @@ public class Post {
     @Column(nullable = false, length = 40)
     private String title;
 
+    @Column(nullable = false, length = 1000, columnDefinition = "VARCHAR(1000) DEFAULT ''")
+    private String contents = "";
+
+    @Column(nullable = false)
+    private boolean isDeleted = false;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private BoardType boardType;
-
     // User와의 관계 설정
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
     private User user;
 
-    // School과의 관계 설정
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "campus_id", referencedColumnName = "campus_id", nullable = false)
     private School campus;
 
@@ -40,6 +44,9 @@ public class Post {
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
 
+    public String getContents() { return contents; }
+    public void setContents(String contents) { this.contents = contents; }
+
     public BoardType getBoardType() { return boardType; }
     public void setBoardType(BoardType boardType) { this.boardType = boardType; }
 
@@ -48,10 +55,19 @@ public class Post {
 
     public School getCampus() { return campus; }
     public void setCampus(School campus) { this.campus = campus; }
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
 
     public List<Applicant> getApplicants() { return applicants; }
     public void setApplicants(List<Applicant> applicants) { this.applicants = applicants; }
-
     public GatheringBoard getGatheringBoard() { return gatheringBoard; }
-    public void setGatheringBoard(GatheringBoard gatheringBoard) { this.gatheringBoard = gatheringBoard; }
+    public void setGatheringBoard(GatheringBoard gatheringBoard) {
+        this.gatheringBoard = gatheringBoard;
+        gatheringBoard.setPost(this); // 양방향 연관관계 설정
+    }
 }

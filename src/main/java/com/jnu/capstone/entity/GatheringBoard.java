@@ -35,29 +35,43 @@ public class GatheringBoard {
     @Column(nullable = false)
     private BoardType boardType;
 
-    @OneToOne
+    @OneToOne(optional = false)
+    @MapsId
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
     // Getters and Setters
     public int getPostId() { return postId; }
     public void setPostId(int postId) { this.postId = postId; }
+
     public String getPlace() { return place; }
     public void setPlace(String place) { this.place = place; }
+
     public String getMeetTime() { return meetTime; }
     public void setMeetTime(String meetTime) { this.meetTime = meetTime; }
+
     public LocalDate getDueDate() { return dueDate; }
     public void setDueDate(LocalDate dueDate) { this.dueDate = dueDate; }
+
     public GenderType getGender() { return gender; }
     public void setGender(GenderType gender) { this.gender = gender; }
+
     public int getMaxParticipants() { return maxParticipants; }
     public void setMaxParticipants(int maxParticipants) { this.maxParticipants = maxParticipants; }
+
     public boolean isAutomatic() { return automatic; }
     public void setAutomatic(boolean automatic) { this.automatic = automatic; }
+
     public int getCurrentParticipants() { return currentParticipants; }
     public void setCurrentParticipants(int currentParticipants) { this.currentParticipants = currentParticipants; }
+
     public BoardType getBoardType() { return boardType; }
     public void setBoardType(BoardType boardType) { this.boardType = boardType; }
+
     public Post getPost() { return post; }
-    public void setPost(Post post) { this.post = post; }
+
+    public void setPost(Post post) {
+        this.post = post;
+        this.postId = post.getPostId(); // 외래키 설정
+    }
 }

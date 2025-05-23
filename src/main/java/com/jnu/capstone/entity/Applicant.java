@@ -7,7 +7,6 @@ import jakarta.persistence.*;
 public class Applicant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private int applicantId;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -18,68 +17,36 @@ public class Applicant {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "application_text", nullable = false, length = 255)
+    @Column(nullable = false, length = 255, columnDefinition = "VARCHAR(255) DEFAULT ''")
     private String applicationText = "";
 
-    @Column(name = "is_accepted", nullable = false)
+    @Column(nullable = false)
     private boolean isAccepted = false;
-
-    @PrePersist
-    public void prePersist() {
-        if (this.applicationText == null) {
-            this.applicationText = "";
-        }
-    }
 
     // Getters and Setters
     public int getApplicantId() { return applicantId; }
     public void setApplicantId(int applicantId) { this.applicantId = applicantId; }
 
     public Post getPost() { return post; }
-    public void setPost(Post post) { this.post = post; }
+    public void setPost(Post post) {
+        this.post = post;
+        if (!post.getApplicants().contains(this)) {
+            post.getApplicants().add(this);
+        }
+    }
 
     public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
-
-    public int getUserId() { return user.getUserId(); }
+    public void setUser(User user) {
+        this.user = user;
+    }
 
     public String getApplicationText() { return applicationText; }
-    public void setApplicationText(String applicationText) { this.applicationText = applicationText; }
+    public void setApplicationText(String applicationText) {
+        this.applicationText = applicationText != null ? applicationText : "";
+    }
 
     public boolean isAccepted() { return isAccepted; }
-    public void setAccepted(boolean isAccepted) { this.isAccepted = isAccepted; }
-
-    @Override
-    public String toString() {
-        return "Applicant{" +
-                "applicantId=" + applicantId +
-                ", post=" + (post != null ? post.getPostId() : null) +
-                ", user=" + (user != null ? user.getUserId() : null) +
-                ", applicationText='" + applicationText + '\'' +
-                ", isAccepted=" + isAccepted +
-                '}';
+    public void setAccepted(boolean accepted) {
+        this.isAccepted = accepted;
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Applicant applicant = (Applicant) o;
-        return applicantId == applicant.applicantId;
-    }
-
-    @Override
-    public int hashCode() {
-        return Integer.hashCode(applicantId);
-    }
-
-
-//    public int getApplicantId() { return applicantId; }
-//    public void setApplicantId(int applicantId) { this.applicantId = applicantId; }
-//    public Post getPost() { return post; }
-//    public void setPost(Post post) { this.post = post; }
-//    public User getUser() { return user; }
-//    public void setUser(User user) { this.user = user; }
-//    public String getApplicationText() { return applicationText; }
-//    public void setApplicationText(String applicationText) { this.applicationText = applicationText; }
 }
