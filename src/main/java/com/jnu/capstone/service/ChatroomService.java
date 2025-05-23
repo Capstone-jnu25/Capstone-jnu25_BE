@@ -20,20 +20,15 @@ public class ChatroomService {
         // 사용자가 참여한 모든 채팅방 조회
         List<ChatJoin> chatJoins = chatJoinRepository.findByUserId(userId);
 
-        // DTO 변환
         return chatJoins.stream()
+                .filter(chatJoin -> !chatJoin.getChatroom().getPost().isDeleted()) // ✅ 삭제된 게시글의 채팅방 숨기기
                 .map(chatJoin -> {
                     var chatroom = chatJoin.getChatroom();
-
-                    // 강제 초기화 (Lazy Loading 문제 해결)
-                    String chatTitle = chatroom.getChatTitle();
-                    String boardType = chatroom.getPost().getBoardType().toString();
-
                     return new ChatroomResponseDto(
                             chatroom.getChattingRoomId(),
-                            chatTitle,
-                            "마지막 메시지",  // TODO: 실제 메시지로 교체 필요
-                            boardType
+                            chatroom.getChatTitle(),
+                            "마지막 메시지",
+                            chatroom.getPost().getBoardType().toString()
                     );
                 })
                 .collect(Collectors.toList());

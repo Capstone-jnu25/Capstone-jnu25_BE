@@ -47,7 +47,8 @@ public class GatheringService {
         int campusId = user.getCampus().getCampusId();
 
         // 해당 학교의 게시글 목록 조회
-        return gatheringBoardRepository.findByBoardTypeAndPost_Campus_CampusId(type, campusId, pageable)
+        return gatheringBoardRepository
+                .findByBoardTypeAndPost_Campus_CampusIdAndPost_IsDeletedFalse(type, campusId, pageable)
                 .map(gatheringBoard -> {
                     LocalDate dueDate = gatheringBoard.getDueDate();
 
@@ -89,6 +90,10 @@ public class GatheringService {
     public GatheringDetailResponseDto getGatheringDetail(int postId) {
         GatheringBoard gatheringBoard = gatheringBoardRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+
+        if (gatheringBoard.getPost().isDeleted()) {
+            throw new IllegalArgumentException("삭제된 게시글입니다.");
+        }
 
         long dDay = Math.max(0, LocalDate.now().until(gatheringBoard.getDueDate()).getDays());
         String dDayText = dDay == 0 ? "D-DAY" : "D-" + dDay;

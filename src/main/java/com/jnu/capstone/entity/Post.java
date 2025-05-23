@@ -16,6 +16,9 @@ public class Post {
     @Column(nullable = false, length = 1000, columnDefinition = "VARCHAR(1000) DEFAULT ''")
     private String contents = "";
 
+    @Column(nullable = false)
+    private boolean isDeleted = false;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private BoardType boardType;
@@ -52,6 +55,13 @@ public class Post {
 
     public School getCampus() { return campus; }
     public void setCampus(School campus) { this.campus = campus; }
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
 
     public List<Applicant> getApplicants() { return applicants; }
     public void setApplicants(List<Applicant> applicants) { this.applicants = applicants; }
