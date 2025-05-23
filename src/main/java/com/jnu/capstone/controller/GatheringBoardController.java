@@ -1,3 +1,4 @@
+
 package com.jnu.capstone.controller;
 
 import com.jnu.capstone.entity.GatheringBoard;

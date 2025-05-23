@@ -1,5 +1,7 @@
+
 package com.jnu.capstone.controller;
 
+import com.jnu.capstone.dto.MyPostSimpleDto;
 import com.jnu.capstone.entity.Post;
 import com.jnu.capstone.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -19,6 +22,14 @@ public class PostController {
     @Autowired
     public PostController(PostService postService) {
         this.postService = postService;
+    }
+
+    // ✅ [추가] 내가 쓴 글을 게시판별로 그룹화해서 조회
+    @GetMapping("/my-grouped")
+    public ResponseEntity<Map<String, List<MyPostSimpleDto>>> getMyGroupedPosts(
+            @RequestHeader("User-Id") int userId) {
+        Map<String, List<MyPostSimpleDto>> result = postService.getMyPostsGroupedByBoardType(userId);
+        return ResponseEntity.ok(result);
     }
 
     // 모든 게시글 조회
@@ -60,4 +71,6 @@ public class PostController {
         postService.deletePost(postId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+
 }

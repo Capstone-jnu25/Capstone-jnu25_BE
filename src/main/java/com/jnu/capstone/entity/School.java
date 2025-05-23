@@ -8,20 +8,23 @@ import java.util.List;
 public class School {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "campus_id")
     private int campusId;
 
-    @Column(nullable = false, length = 100)
+    @Column(name = "campus_name", nullable = false, length = 100)
     private String campusName;
 
-    @Column(nullable = false, precision = 10, scale = 8)
+    @Column(nullable = false, columnDefinition = "DECIMAL(10,8)")
     private double latitude;
 
-    @Column(nullable = false, precision = 11, scale = 8)
+    @Column(nullable = false, columnDefinition = "DECIMAL(11,8)")
     private double longitude;
 
+    // Post와의 관계 설정
     @OneToMany(mappedBy = "campus", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts;
 
+    // User와의 관계 설정
     @OneToMany(mappedBy = "campus", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<User> users;
 
