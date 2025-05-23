@@ -22,13 +22,13 @@ public class Post {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private BoardType boardType;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    // User와의 관계 설정
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "campus_id", nullable = false)
+    @JoinColumn(name = "campus_id", referencedColumnName = "campus_id", nullable = false)
     private School campus;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -65,7 +65,6 @@ public class Post {
 
     public List<Applicant> getApplicants() { return applicants; }
     public void setApplicants(List<Applicant> applicants) { this.applicants = applicants; }
-
     public GatheringBoard getGatheringBoard() { return gatheringBoard; }
     public void setGatheringBoard(GatheringBoard gatheringBoard) {
         this.gatheringBoard = gatheringBoard;
