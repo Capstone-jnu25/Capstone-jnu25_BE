@@ -32,7 +32,7 @@ public class CapstoneApplication {
 //			user.setDepartment("인공지능학부");
 //			user.setStudentNum(2222222);
 //
-//			userRepository.save(user);
+//			userRepository.save(user);xp
 //			System.out.println("사용자 저장 완료!");
 //		};
 //	}

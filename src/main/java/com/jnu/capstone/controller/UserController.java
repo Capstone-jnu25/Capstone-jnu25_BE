@@ -10,6 +10,7 @@ import com.jnu.capstone.dto.LoginRequestDto;
 import com.jnu.capstone.dto.LoginResponseDto;
 
 
+
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -36,7 +37,7 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserById(userId));
     }
 
-    // 사용자 정보 수정 (닉네임, 학과, 학번)
+    // 사용자 정보 수정 (학과)
     @PutMapping("/{userId}")
     public ResponseEntity<UserResponseDto> updateUser(@PathVariable int userId, @RequestBody UserUpdateRequestDto requestDto) {
         return ResponseEntity.ok(userService.updateUser(userId, requestDto));
@@ -77,6 +78,7 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
+    //회원가입기능
     @PostMapping("/signup")
     public ResponseEntity<UserSignupResponseDto> signup(@RequestBody UserSignupRequestDto requestDto) {
         UserSignupResponseDto responseDto = userService.signup(requestDto);
@@ -96,5 +98,6 @@ public class UserController {
         userService.verifyEmailCode(requestDto);
         return ResponseEntity.ok("이메일 인증이 완료되었습니다.");
     }
+
 
 }
