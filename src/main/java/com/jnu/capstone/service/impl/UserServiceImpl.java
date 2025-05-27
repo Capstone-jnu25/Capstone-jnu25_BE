@@ -1,5 +1,6 @@
 package com.jnu.capstone.service.impl;
 
+import java.util.Map;
 import com.jnu.capstone.dto.LoginRequestDto;
 import com.jnu.capstone.dto.LoginResponseDto;
 import com.jnu.capstone.dto.*;
@@ -24,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -43,8 +45,14 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private RestTemplate restTemplate;
 
+    @Autowired
+    private EmailVerificationService emailVerificationService;
+
     @Value("${univcert.api.key}")
     private String univCertApiKey;
+
+    // ✅ 이메일 인증 상태를 임시 저장 (서버 재시작 시 사라짐)
+    private final Map<String, Boolean> verifiedEmailStore = new ConcurrentHashMap<>();
 
     @Override
     public LoginResponseDto login(LoginRequestDto requestDto) {
@@ -81,11 +89,12 @@ public class UserServiceImpl implements UserService {
         School campus = schoolRepository.findById(requestDto.getCampusId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 캠퍼스입니다."));
 
-        // 이메일 인증 여부 확인
-        User existingUser = userRepository.findByEmail(requestDto.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("이메일 인증이 필요합니다."));
+        // ✅ 이메일 인증 여부 UnivCert 통해 확인
+        EmailStatusRequestDto dto = new EmailStatusRequestDto();
+        dto.setEmail(requestDto.getEmail());
 
-        if (!existingUser.isEmailVerified()) {
+        boolean isVerified = emailVerificationService.checkEmailVerified(dto);
+        if (!isVerified) {
             throw new IllegalArgumentException("이메일 인증이 완료되지 않았습니다.");
         }
 
@@ -98,18 +107,66 @@ public class UserServiceImpl implements UserService {
         user.setPassword(encryptedPassword);
         user.setNickname(requestDto.getNickname());
         user.setCampus(campus);
-        user.setDepartment(requestDto.getDepartment());
         user.setStudentNum(requestDto.getStudentNum());
         user.setGoodCount(0);
         user.setBadCount(0);
-        user.setEmailVerified(true); // 이메일 인증 완료 처리
+        user.setEmailVerified(true); // 인증 상태 저장
 
-        // User 저장
+        // 저장
         User savedUser = userRepository.save(user);
 
-        // Response 생성
+        // 응답 생성
         return new UserSignupResponseDto(savedUser.getUserId(), savedUser.getEmail(), savedUser.getNickname());
     }
+
+
+
+//    @Override
+//    @Transactional
+//    public UserSignupResponseDto signup(UserSignupRequestDto requestDto) {
+//        // 이메일 중복 체크
+//        if (userRepository.existsByEmail(requestDto.getEmail())) {
+//            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+//        }
+//
+//        // 닉네임 중복 체크
+//        if (userRepository.existsByNickname(requestDto.getNickname())) {
+//            throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
+//        }
+//
+//        // 캠퍼스 조회
+//        School campus = schoolRepository.findById(requestDto.getCampusId())
+//                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 캠퍼스입니다."));
+//
+//        // ✅ 이메일 인증 여부 확인 (임시 저장소만 확인)
+//        if (!verifiedEmailStore.getOrDefault(requestDto.getEmail(), false)) {
+//            throw new IllegalArgumentException("이메일 인증이 완료되지 않았습니다.");
+//        }
+//
+//        // 비밀번호 암호화
+//        String encryptedPassword = passwordEncoder.encode(requestDto.getPassword());
+//
+//        // User 엔티티 생성
+//        User user = new User();
+//        user.setEmail(requestDto.getEmail());
+//        user.setPassword(encryptedPassword);
+//        user.setNickname(requestDto.getNickname());
+//        user.setCampus(campus);
+//        user.setStudentNum(requestDto.getStudentNum());
+//        user.setGoodCount(0);
+//        user.setBadCount(0);
+//        user.setEmailVerified(true); // 이메일 인증 완료 처리
+//
+//        // 저장
+//        User savedUser = userRepository.save(user);
+//
+//        // 인증 상태 제거 (선택)
+//        verifiedEmailStore.remove(requestDto.getEmail());
+//
+//        // 응답 생성
+//        return new UserSignupResponseDto(savedUser.getUserId(), savedUser.getEmail(), savedUser.getNickname());
+//    }
+
 
     @Override
     public void sendVerificationEmail(EmailVerificationRequestDto requestDto) {
@@ -144,16 +201,17 @@ public class UserServiceImpl implements UserService {
         HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 
+        //✅✅✅✅✅확인용
+        System.out.println("📨 UnivCert 응답: " + response.getBody());
+
         if (!response.getBody().contains("\"success\":true")) {
             throw new IllegalArgumentException("인증 코드가 일치하지 않습니다.");
         }
 
-        // 이메일 인증 완료 처리
-        User user = userRepository.findByEmail(requestDto.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-        user.setEmailVerified(true);
-        userRepository.save(user);
+        // ✅ 임시로 인증된 이메일 저장 (예: Memory, Redis 등)
+        verifiedEmailStore.put(requestDto.getEmail(), true);
     }
+
 
     @Override
     public boolean isEmailVerified(String email) {

@@ -4,10 +4,10 @@ import lombok.Data;
 
 @Data
 public class UserSignupRequestDto {
+    private int campusId;
     private String email;
     private String password;
     private String nickname;
-    private int campusId;
-    private String department;
+//    private String department;
     private int studentNum;
 }

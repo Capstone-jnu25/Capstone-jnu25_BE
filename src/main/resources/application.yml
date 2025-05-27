@@ -23,3 +23,11 @@ spring:
           use_second_level_cache: false
           use_query_cache: false
     timezone: Asia/Seoul
+
+jwt:
+  secret: "QxG8aPZk9cV3vA1hXyW6rUzCmNe4HsLoBqTyWuZkR8ElTvUgQrMpNzLdJvHuQsPx"
+  expiration: 86400000
+
+univcert:
+  api:
+    key: "e30ab839-0af8-471f-a4fb-84df7ac01a4f"
