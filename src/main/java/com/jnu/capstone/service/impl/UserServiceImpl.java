@@ -68,104 +68,65 @@ public class UserServiceImpl implements UserService {
         // 토큰 생성
         String token = jwtTokenProvider.generateToken(user.getUserId(), user.getEmail());
 
+        // ✅ 사용자 학교의 위도/경도 가져오기
+        School school = user.getCampus();
+        double latitude = school.getLatitude();
+        double longitude = school.getLongitude();
+
         // 로그인 응답 생성
-        return new LoginResponseDto(user.getUserId(), user.getEmail(), user.getNickname(), token);
+        return new LoginResponseDto(user.getUserId(), user.getEmail(), user.getNickname(), token, latitude, longitude);
     }
+
+
+//    @Override
+//    public LoginResponseDto login(LoginRequestDto requestDto) {
+//        // 사용자 조회
+//        User user = userRepository.findByEmail(requestDto.getEmail())
+//                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
+//
+//        // 비밀번호 검증
+//        if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
+//            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+//        }
+//
+//        // 토큰 생성
+//        String token = jwtTokenProvider.generateToken(user.getUserId(), user.getEmail());
+//
+//        // 로그인 응답 생성
+//        return new LoginResponseDto(user.getUserId(), user.getEmail(), user.getNickname(), token);
+//    }
+
 
     @Override
     @Transactional
     public UserSignupResponseDto signup(UserSignupRequestDto requestDto) {
-        // 이메일 중복 체크
-        if (userRepository.existsByEmail(requestDto.getEmail())) {
-            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
-        }
+        String univName = requestDto.getUnivName();
 
-        // 닉네임 중복 체크
-        if (userRepository.existsByNickname(requestDto.getNickname())) {
-            throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
-        }
+        Optional<School> optionalSchool = schoolRepository.findByCampusName(univName);
 
-        // 캠퍼스 조회
-        School campus = schoolRepository.findById(requestDto.getCampusId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 캠퍼스입니다."));
+        School school = optionalSchool.orElseGet(() -> {
+            School newSchool = new School();
+            newSchool.setCampusName(univName);
+            newSchool.setLatitude(requestDto.getLatitude());
+            newSchool.setLongitude(requestDto.getLongitude());
+            return schoolRepository.save(newSchool);
+        });
 
-        // ✅ 이메일 인증 여부 UnivCert 통해 확인
-        EmailStatusRequestDto dto = new EmailStatusRequestDto();
-        dto.setEmail(requestDto.getEmail());
-
-        boolean isVerified = emailVerificationService.checkEmailVerified(dto);
-        if (!isVerified) {
-            throw new IllegalArgumentException("이메일 인증이 완료되지 않았습니다.");
-        }
-
-        // 비밀번호 암호화
-        String encryptedPassword = passwordEncoder.encode(requestDto.getPassword());
-
-        // User 엔티티 생성
         User user = new User();
         user.setEmail(requestDto.getEmail());
-        user.setPassword(encryptedPassword);
+        user.setPassword(passwordEncoder.encode(requestDto.getPassword()));
         user.setNickname(requestDto.getNickname());
-        user.setCampus(campus);
         user.setStudentNum(requestDto.getStudentNum());
+        user.setCampus(school);
         user.setGoodCount(0);
         user.setBadCount(0);
-        user.setEmailVerified(true); // 인증 상태 저장
+        user.setEmailVerified(true);
 
-        // 저장
         User savedUser = userRepository.save(user);
 
-        // 응답 생성
         return new UserSignupResponseDto(savedUser.getUserId(), savedUser.getEmail(), savedUser.getNickname());
     }
 
-
-
-//    @Override
-//    @Transactional
-//    public UserSignupResponseDto signup(UserSignupRequestDto requestDto) {
-//        // 이메일 중복 체크
-//        if (userRepository.existsByEmail(requestDto.getEmail())) {
-//            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
-//        }
-//
-//        // 닉네임 중복 체크
-//        if (userRepository.existsByNickname(requestDto.getNickname())) {
-//            throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
-//        }
-//
-//        // 캠퍼스 조회
-//        School campus = schoolRepository.findById(requestDto.getCampusId())
-//                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 캠퍼스입니다."));
-//
-//        // ✅ 이메일 인증 여부 확인 (임시 저장소만 확인)
-//        if (!verifiedEmailStore.getOrDefault(requestDto.getEmail(), false)) {
-//            throw new IllegalArgumentException("이메일 인증이 완료되지 않았습니다.");
-//        }
-//
-//        // 비밀번호 암호화
-//        String encryptedPassword = passwordEncoder.encode(requestDto.getPassword());
-//
-//        // User 엔티티 생성
-//        User user = new User();
-//        user.setEmail(requestDto.getEmail());
-//        user.setPassword(encryptedPassword);
-//        user.setNickname(requestDto.getNickname());
-//        user.setCampus(campus);
-//        user.setStudentNum(requestDto.getStudentNum());
-//        user.setGoodCount(0);
-//        user.setBadCount(0);
-//        user.setEmailVerified(true); // 이메일 인증 완료 처리
-//
-//        // 저장
-//        User savedUser = userRepository.save(user);
-//
-//        // 인증 상태 제거 (선택)
-//        verifiedEmailStore.remove(requestDto.getEmail());
-//
-//        // 응답 생성
-//        return new UserSignupResponseDto(savedUser.getUserId(), savedUser.getEmail(), savedUser.getNickname());
-//    }
 
 
     @Override

@@ -2,10 +2,11 @@ package com.jnu.capstone.service;
 
 import com.jnu.capstone.dto.SecondhandBoardCreateRequestDto;
 import com.jnu.capstone.dto.SecondhandBoardDto;
-import com.jnu.capstone.entity.Post;
-import com.jnu.capstone.entity.SecondhandBoard;
+import com.jnu.capstone.entity.*;
 import com.jnu.capstone.repository.PostRepository;
+import com.jnu.capstone.repository.SchoolRepository;
 import com.jnu.capstone.repository.SecondhandBoardRepository;
+import com.jnu.capstone.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,21 +23,79 @@ public class SecondhandBoardService {
     @Autowired
     private PostRepository postRepository;
 
-    // 게시글 등록
-    public void createSecondhandBoard(SecondhandBoardCreateRequestDto dto) {
-        Post post = postRepository.findById(dto.getPostId())
-                .orElseThrow(() -> new IllegalArgumentException("해당 postId의 게시글이 존재하지 않습니다."));
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private SchoolRepository schoolRepository;
+
+    public void createSecondhandBoard(SecondhandBoardCreateRequestDto dto, int userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        School campus = user.getCampus();
+
+        Post post = new Post();
+        post.setTitle(dto.getTitle());
+        post.setContents(dto.getContents());
+        post.setBoardType(BoardType.SECONDHAND);
+        post.setUser(user);
+        post.setCampus(campus);
+        post = postRepository.save(post);
 
         SecondhandBoard board = new SecondhandBoard();
         board.setPost(post);
-        board.setPostId(dto.getPostId());
+        board.setPostId(post.getPostId());
         board.setPlace(dto.getPlace());
-        board.setWriteTime(dto.getWriteTime());
+        board.setWriteTime(new Date()); // 서버에서 시간 설정
         board.setPhoto(dto.getPhoto());
         board.setPrice(dto.getPrice());
 
         secondhandBoardRepository.save(board);
     }
+
+
+    // 게시글 등록
+//    public void createSecondhandBoard(SecondhandBoardCreateRequestDto dto, int userId, int campusId) {
+//        // 1. Post 엔티티 생성
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+//        School campus = schoolRepository.findById(campusId)
+//                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 캠퍼스입니다."));
+//
+//        Post post = new Post();
+//        post.setTitle(dto.getTitle());
+//        post.setContents(dto.getContents());
+//        post.setBoardType(BoardType.SECONDHAND);
+//        post.setUser(user);
+//        post.setCampus(campus);
+//        post = postRepository.save(post); // postId 자동 생성됨
+//
+//        // 2. SecondhandBoard 생성
+//        SecondhandBoard board = new SecondhandBoard();
+//        board.setPost(post);
+//        board.setPostId(post.getPostId());
+//        board.setPlace(dto.getPlace());
+//        board.setWriteTime(new Date());
+//        board.setPhoto(dto.getPhoto());
+//        board.setPrice(dto.getPrice());
+//
+//        secondhandBoardRepository.save(board);
+//    }
+
+//    public void createSecondhandBoard(SecondhandBoardCreateRequestDto dto) {
+//        Post post = postRepository.findById(dto.getPostId())
+//                .orElseThrow(() -> new IllegalArgumentException("해당 postId의 게시글이 존재하지 않습니다."));
+//
+//        SecondhandBoard board = new SecondhandBoard();
+//        board.setPost(post);
+//        board.setPostId(dto.getPostId());
+//        board.setPlace(dto.getPlace());
+//        board.setWriteTime(dto.getWriteTime());
+//        board.setPhoto(dto.getPhoto());
+//        board.setPrice(dto.getPrice());
+//
+//        secondhandBoardRepository.save(board);
+//    }
 
     // 게시글 전체 목록 조회
     public List<SecondhandBoardDto> getAllBoards() {
