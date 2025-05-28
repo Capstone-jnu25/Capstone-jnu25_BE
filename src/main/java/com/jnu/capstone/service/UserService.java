@@ -20,6 +20,7 @@ public interface UserService {
     LoginResponseDto login(LoginRequestDto requestDto);
     // 회원가입 기능
     UserSignupResponseDto signup(UserSignupRequestDto requestDto);
+    //    UserSignupResponseDto signup(UserSignupRequestDto requestDto);
 
     // 이메일 인증 기능
     void sendVerificationEmail(EmailVerificationRequestDto requestDto);

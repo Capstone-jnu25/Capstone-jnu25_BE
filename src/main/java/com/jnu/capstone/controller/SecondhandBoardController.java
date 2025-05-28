@@ -4,8 +4,9 @@ import com.jnu.capstone.dto.SecondhandBoardCreateRequestDto;
 import com.jnu.capstone.dto.SecondhandBoardDto;
 import com.jnu.capstone.service.SecondhandBoardService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
-
+import com.jnu.capstone.util.JwtTokenProvider;
 import java.util.List;
 
 @RestController
@@ -15,10 +16,18 @@ public class SecondhandBoardController {
     @Autowired
     private SecondhandBoardService secondhandBoardService;
 
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+
     // 게시글 등록
     @PostMapping
-    public String createBoard(@RequestBody SecondhandBoardCreateRequestDto dto) {
-        secondhandBoardService.createSecondhandBoard(dto);
+    public String createBoard(@RequestBody SecondhandBoardCreateRequestDto dto,
+                              @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+
+        String token = authorizationHeader.replace("Bearer ", "");
+        int userId = jwtTokenProvider.getUserIdFromToken(token); // 사용자 ID 추출
+
+        secondhandBoardService.createSecondhandBoard(dto, userId);
         return "중고거래 게시글이 등록되었습니다.";
     }
 
