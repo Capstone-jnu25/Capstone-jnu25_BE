@@ -109,7 +109,8 @@ public class GatheringService {
                 gatheringBoard.getPlace(),
                 gatheringBoard.getGender().toString(),
                 gatheringBoard.getMeetTime(),
-                isClosed
+                isClosed,
+                gatheringBoard.getPost().getUser().getUserId()
         );
     }
 
