@@ -103,6 +103,19 @@ public class ApplicantService {
         if (gatheringBoard.isAutomatic()) {
             applicant.setAccepted(true);
             gatheringBoard.setCurrentParticipants(gatheringBoard.getCurrentParticipants() + 1);
+
+            // ✅ Chatroom 찾기
+            Chatroom chatroom = chatroomRepository.findByPost_PostId(postId)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 게시글에 대한 채팅방이 존재하지 않습니다."));
+
+            // 중복 방지
+            boolean alreadyJoined = chatJoinRepository.existsByUserIdAndChattingRoomId(userId, chatroom.getChattingRoomId());
+            if (!alreadyJoined) {
+                ChatJoin chatJoin = new ChatJoin();
+                chatJoin.setUserId(userId);
+                chatJoin.setChattingRoomId(chatroom.getChattingRoomId());
+                chatJoinRepository.save(chatJoin);
+            }
         }
 
         // DB에 저장
