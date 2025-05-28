@@ -1,6 +1,7 @@
 package com.jnu.capstone.controller;
 
 import com.jnu.capstone.service.ApplicantService;
+import com.jnu.capstone.util.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,9 +14,19 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/gathering")
 public class ApplicantController {
-
     @Autowired
     private ApplicantService applicantService;
+
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+
+    private int extractUserId(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new IllegalArgumentException("유효하지 않은 인증 토큰입니다.");
+        }
+        String token = authHeader.substring(7); // "Bearer " 이후 토큰만
+        return jwtTokenProvider.getUserIdFromToken(token);
+    }
 
     @GetMapping("/{postId}/applicants")
     public ResponseEntity<?> getApplicants(
@@ -46,17 +57,11 @@ public class ApplicantController {
     @PostMapping("/{postId}/apply")
     public ResponseEntity<?> applyForGathering(
             @PathVariable int postId,
-            @RequestHeader(value = "User-Id", required = false) Integer userId,
+            @RequestHeader("Authorization") String authHeader,
             @RequestBody(required = false) Map<String, String> requestBody
     ) {
         try {
-            // 사용자 ID가 없는 경우 에러 처리
-            if (userId == null) {
-                return ResponseEntity.badRequest().body(Map.of(
-                        "status", "error",
-                        "message", "User-Id 헤더가 필요합니다."
-                ));
-            }
+            int userId = extractUserId(authHeader);
 
             // 스터디 게시글인 경우 지원 문구 포함
             String applicationText = "";
@@ -84,9 +89,10 @@ public class ApplicantController {
     @PostMapping("/applicants/{applicantId}/accept")
     public ResponseEntity<?> acceptApplicant(
             @PathVariable int applicantId,
-            @RequestHeader("User-Id") int userId
+            @RequestHeader("Authorization") String authHeader
     ) {
         try {
+            int userId = extractUserId(authHeader);
             applicantService.acceptApplicant(applicantId, userId);
             return ResponseEntity.ok(Map.of(
                     "status", "success",
@@ -103,9 +109,10 @@ public class ApplicantController {
     @DeleteMapping("/applicants/{applicantId}")
     public ResponseEntity<?> deleteApplicant(
             @PathVariable int applicantId,
-            @RequestHeader("User-Id") int userId
+            @RequestHeader("Authorization") String authHeader
     ) {
         try {
+            int userId = extractUserId(authHeader);
             applicantService.deleteApplicant(applicantId, userId);
             return ResponseEntity.ok(Map.of(
                     "status", "success",

@@ -10,6 +10,7 @@ import com.jnu.capstone.repository.ChatroomRepository;
 import com.jnu.capstone.repository.ChatJoinRepository;
 import com.jnu.capstone.repository.MessageRepository;
 import com.jnu.capstone.repository.UserRepository;
+import com.jnu.capstone.util.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,6 +35,18 @@ public class MessageController {
 
     @Autowired
     private MessageService messageService;
+
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+
+    // ✅ JWT 토큰에서 userId 추출
+    private int extractUserId(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new IllegalArgumentException("유효하지 않은 인증 토큰입니다.");
+        }
+        String token = authHeader.substring(7);
+        return jwtTokenProvider.getUserIdFromToken(token);
+    }
     @GetMapping("/{chattingRoomId}/messages")
     public ResponseEntity<?> getMessages(
             @PathVariable Integer chattingRoomId,
@@ -52,9 +65,10 @@ public class MessageController {
     @PostMapping("/{chattingRoomId}/messages")
     public ResponseEntity<?> sendMessage(
             @PathVariable int chattingRoomId,
-            @RequestHeader("User-Id") int userId,
+            @RequestHeader("Authorization") String authHeader,
             @RequestBody Map<String, String> requestBody
     ) {
+        int userId = extractUserId(authHeader);
         // 채팅방 확인
         Chatroom chatroom = chatroomRepository.findById(chattingRoomId)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
