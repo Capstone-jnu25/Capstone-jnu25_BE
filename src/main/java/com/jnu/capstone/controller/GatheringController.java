@@ -56,11 +56,17 @@ public class GatheringController {
 
 
     @GetMapping("/{postId}")
-    public ResponseEntity<?> getGatheringDetail(@PathVariable int postId) {
+    public ResponseEntity<?> getGatheringDetail(@PathVariable int postId, @RequestHeader("Authorization") String authHeader) {
+        int userId = extractUserId(authHeader);
         GatheringDetailResponseDto responseDto = gatheringService.getGatheringDetail(postId);
+
+        int authorId = responseDto.getAuthorId(); // 작성자 ID 포함 필요
+        boolean isAuthor = (userId == authorId);
+
         Map<String, Object> response = Map.of(
                 "status", "success",
-                "data", responseDto
+                "data", responseDto,
+                "isAuthor", isAuthor
         );
 
         return ResponseEntity.ok(response);

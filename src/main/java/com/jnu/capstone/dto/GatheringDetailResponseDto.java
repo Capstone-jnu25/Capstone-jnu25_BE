@@ -9,8 +9,9 @@ public class GatheringDetailResponseDto {
     private String gender;
     private String time;
     private boolean isClosed;
+    private int authorId;
 
-    public GatheringDetailResponseDto(int postId, String title, String dDay, String contents, String place, String gender, String time, boolean isClosed) {
+    public GatheringDetailResponseDto(int postId, String title, String dDay, String contents, String place, String gender, String time, boolean isClosed, int authorId) {
         this.postId = postId;
         this.title = title;
         this.dDay = dDay;
@@ -19,6 +20,7 @@ public class GatheringDetailResponseDto {
         this.gender = gender;
         this.time = time;
         this.isClosed = isClosed;
+        this.authorId = authorId;
     }
 
     // Getters and Setters
@@ -45,4 +47,11 @@ public class GatheringDetailResponseDto {
 
     public boolean isClosed() { return isClosed; }
     public void setClosed(boolean closed) { isClosed = closed; }
+    public int getAuthorId() {
+        return authorId;
+    }
+
+    public void setAuthorId(int authorId) {
+        this.authorId = authorId;
+    }
 }
