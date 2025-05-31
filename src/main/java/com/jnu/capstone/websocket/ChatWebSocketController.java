@@ -50,6 +50,7 @@ public class ChatWebSocketController {
         MessageResponseDto dto = new MessageResponseDto(
                 message.getMessageId(),
                 user.getUserId(),
+                user.getNickname(),
                 message.getDetailMessage(),
                 message.getSendTime()
         );
