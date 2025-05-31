@@ -5,6 +5,7 @@ import com.jnu.capstone.entity.ChatJoin;
 import com.jnu.capstone.entity.User;
 import com.jnu.capstone.repository.ChatJoinRepository;
 import com.jnu.capstone.repository.UserRepository;
+import com.jnu.capstone.repository.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,8 @@ public class ChatroomService {
     private ChatJoinRepository chatJoinRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private MessageRepository messageRepository;
     @Transactional(readOnly = true)
     public List<ChatroomResponseDto> getMyChatrooms(int userId) {
         // 요청자 닉네임 조회
@@ -38,11 +41,16 @@ public class ChatroomService {
                     if (title.contains(",") && title.split(",").length == 2) {
                         finalTitle = extractOpponentNickname(title, myNickname);
                     }
+                    // ✅ 마지막 메시지 조회
+                    String lastMessage = messageRepository
+                            .findTopByChatroomOrderBySendTimeDesc(chatroom)
+                            .map(m -> m.getDetailMessage())
+                            .orElse("");
 
                     return new ChatroomResponseDto(
                             chatroom.getChattingRoomId(),
                             finalTitle,
-                            "마지막 메시지",
+                            lastMessage,
                             chatroom.getPost().getBoardType().toString()
                     );
                 })
