@@ -31,6 +31,7 @@ public class MessageService {
                 .map(m -> new MessageResponseDto(
                         m.getMessageId(),
                         m.getSender().getUserId(),
+                        m.getSender().getNickname(),
                         m.getDetailMessage(),
                         m.getSendTime()
                 )).toList();

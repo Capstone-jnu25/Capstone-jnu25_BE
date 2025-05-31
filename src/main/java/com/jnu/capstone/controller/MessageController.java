@@ -62,6 +62,7 @@ public class MessageController {
         ));
     }
 
+    /*
     @PostMapping("/{chattingRoomId}/messages")
     public ResponseEntity<?> sendMessage(
             @PathVariable int chattingRoomId,
@@ -111,5 +112,5 @@ public class MessageController {
                 "status", "success",
                 "data", responseDto
         ));
-    }
+    }*/
 }
