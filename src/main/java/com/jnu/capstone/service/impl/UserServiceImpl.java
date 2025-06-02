@@ -11,15 +11,15 @@ import com.jnu.capstone.repository.UserRepository;
 import com.jnu.capstone.service.UserService;
 import com.jnu.capstone.util.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.MediaType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -47,6 +47,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private EmailVerificationService emailVerificationService;
+
+//    @Autowired
+//    private UserService userService;
 
     @Value("${univcert.api.key}")
     private String univCertApiKey;
@@ -209,21 +212,24 @@ public class UserServiceImpl implements UserService {
     public UserResponseDto updateUser(int userId, UserUpdateRequestDto requestDto) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-
-        // 닉네임 수정
-        if (requestDto.getNickname() != null) {
-            user.setNickname(requestDto.getNickname());
-        }
+//
+//        // 닉네임 수정
+//        if (requestDto.getNickname() != null) {
+//            user.setNickname(requestDto.getNickname());
+//        }
 
         // 학과 수정
-        if (requestDto.getDepartment() != null) {
+        if ((user.getDepartment() == null || user.getDepartment().isBlank())
+                && requestDto.getDepartment() != null && !requestDto.getDepartment().isBlank()) {
             user.setDepartment(requestDto.getDepartment());
         }
 
-        // 학번 수정
-        if (requestDto.getStudentNum() > 0) {
-            user.setStudentNum(requestDto.getStudentNum());
-        }
+
+//
+//        // 학번 수정
+//        if (requestDto.getStudentNum() > 0) {
+//            user.setStudentNum(requestDto.getStudentNum());
+//        }
 
         // 수정된 유저 저장
         userRepository.save(user);
@@ -233,27 +239,37 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void changePassword(int userId, PasswordChangeRequestDto requestDto) {
-        // 사용자 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-        // 현재 비밀번호 검증
-        if (!passwordEncoder.matches(requestDto.getCurrentPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
-        }
-
-        // 현재 비밀번호와 새 비밀번호가 같은지 검사
-        if (requestDto.getCurrentPassword().equals(requestDto.getNewPassword())) {
-            throw new IllegalArgumentException("새 비밀번호는 현재 비밀번호와 달라야 합니다.");
-        }
-
-        // 새 비밀번호 암호화
-        String encryptedNewPassword = passwordEncoder.encode(requestDto.getNewPassword());
-
-        // 비밀번호 변경
-        user.setPassword(encryptedNewPassword);
+        String encryptedPassword = passwordEncoder.encode(requestDto.getNewPassword());
+        user.setPassword(encryptedPassword); // password는 User 엔티티에 있는 필드명과 일치해야 함
         userRepository.save(user);
     }
+//    @Override
+//    @Transactional
+//    public void changePassword(int userId, PasswordChangeRequestDto requestDto) {
+//        // 사용자 조회
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+//
+////        // 현재 비밀번호 검증
+////        if (!passwordEncoder.matches(requestDto.getCurrentPassword(), user.getPassword())) {
+////            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+////        }
+//
+////        // 현재 비밀번호와 새 비밀번호가 같은지 검사
+////        if (requestDto.getCurrentPassword().equals(requestDto.getNewPassword())) {
+////            throw new IllegalArgumentException("새 비밀번호는 현재 비밀번호와 달라야 합니다.");
+////        }
+//
+//        // 새 비밀번호 암호화
+//        String encryptedNewPassword = passwordEncoder.encode(requestDto.getNewPassword());
+//
+//        // 비밀번호 변경
+//        user.setPassword(encryptedNewPassword);
+//        userRepository.save(user);
+//    }
 
 
     @Override

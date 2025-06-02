@@ -12,7 +12,7 @@ public class UserResponseDto {
     private int studentNum;
     private int goodCount;
     private int badCount;
-    private String profileImageUrl;  // 추가된 필드
+//    private String profileImageUrl;  // 추가된 필드
 
     public static UserResponseDto fromEntity(User user) {
         UserResponseDto dto = new UserResponseDto();

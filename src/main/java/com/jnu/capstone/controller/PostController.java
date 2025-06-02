@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.jnu.capstone.util.JwtTokenProvider;
 
 import java.util.List;
 import java.util.Map;
@@ -18,16 +19,21 @@ import java.util.Optional;
 public class PostController {
 
     private final PostService postService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Autowired
-    public PostController(PostService postService) {
+    public PostController(PostService postService, JwtTokenProvider jwtTokenProvider) {
         this.postService = postService;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     // ✅ [추가] 내가 쓴 글을 게시판별로 그룹화해서 조회
     @GetMapping("/my-grouped")
     public ResponseEntity<Map<String, List<MyPostSimpleDto>>> getMyGroupedPosts(
-            @RequestHeader("User-Id") int userId) {
+            @RequestHeader("Authorization") String token) {
+        String jwt = token.replace("Bearer ", "");
+        int userId = jwtTokenProvider.getUserIdFromToken(jwt);
+
         Map<String, List<MyPostSimpleDto>> result = postService.getMyPostsGroupedByBoardType(userId);
         return ResponseEntity.ok(result);
     }

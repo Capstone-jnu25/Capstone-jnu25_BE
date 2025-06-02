@@ -9,6 +9,7 @@ import com.jnu.capstone.repository.SecondhandBoardRepository;
 import com.jnu.capstone.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // ✅ 추가
 
 import java.util.Date;
 import java.util.List;
@@ -29,85 +30,44 @@ public class SecondhandBoardService {
     @Autowired
     private SchoolRepository schoolRepository;
 
+    @Transactional  // ✅ 이거 꼭 추가해 주세요!
     public void createSecondhandBoard(SecondhandBoardCreateRequestDto dto, int userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         School campus = user.getCampus();
 
+        // 1. Post 생성 및 저장
         Post post = new Post();
         post.setTitle(dto.getTitle());
         post.setContents(dto.getContents());
         post.setBoardType(BoardType.SECONDHAND);
         post.setUser(user);
         post.setCampus(campus);
-        post = postRepository.save(post);
+        post = postRepository.save(post); // 영속성 컨텍스트에 저장됨
 
+        // 2. SecondhandBoard 생성
         SecondhandBoard board = new SecondhandBoard();
-        board.setPost(post);
-        board.setPostId(post.getPostId());
+        board.setPost(post); // @MapsId: postId도 자동 설정됨
         board.setPlace(dto.getPlace());
-        board.setWriteTime(new Date()); // 서버에서 시간 설정
+        board.setWriteTime(new Date());
         board.setPhoto(dto.getPhoto());
         board.setPrice(dto.getPrice());
 
-        secondhandBoardRepository.save(board);
+        secondhandBoardRepository.save(board); // 정상 저장
     }
-
-
-    // 게시글 등록
-//    public void createSecondhandBoard(SecondhandBoardCreateRequestDto dto, int userId, int campusId) {
-//        // 1. Post 엔티티 생성
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
-//        School campus = schoolRepository.findById(campusId)
-//                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 캠퍼스입니다."));
-//
-//        Post post = new Post();
-//        post.setTitle(dto.getTitle());
-//        post.setContents(dto.getContents());
-//        post.setBoardType(BoardType.SECONDHAND);
-//        post.setUser(user);
-//        post.setCampus(campus);
-//        post = postRepository.save(post); // postId 자동 생성됨
-//
-//        // 2. SecondhandBoard 생성
-//        SecondhandBoard board = new SecondhandBoard();
-//        board.setPost(post);
-//        board.setPostId(post.getPostId());
-//        board.setPlace(dto.getPlace());
-//        board.setWriteTime(new Date());
-//        board.setPhoto(dto.getPhoto());
-//        board.setPrice(dto.getPrice());
-//
-//        secondhandBoardRepository.save(board);
-//    }
-
-//    public void createSecondhandBoard(SecondhandBoardCreateRequestDto dto) {
-//        Post post = postRepository.findById(dto.getPostId())
-//                .orElseThrow(() -> new IllegalArgumentException("해당 postId의 게시글이 존재하지 않습니다."));
-//
-//        SecondhandBoard board = new SecondhandBoard();
-//        board.setPost(post);
-//        board.setPostId(dto.getPostId());
-//        board.setPlace(dto.getPlace());
-//        board.setWriteTime(dto.getWriteTime());
-//        board.setPhoto(dto.getPhoto());
-//        board.setPrice(dto.getPrice());
-//
-//        secondhandBoardRepository.save(board);
-//    }
 
     // 게시글 전체 목록 조회
     public List<SecondhandBoardDto> getAllBoards() {
-        return secondhandBoardRepository.findAll()
+        return secondhandBoardRepository.findAllWithPost()
                 .stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
+
     // 게시글 상세 조회
     public SecondhandBoardDto getBoardByPostId(int postId) {
-        SecondhandBoard board = secondhandBoardRepository.findById(postId)
+        SecondhandBoard board = secondhandBoardRepository.findWithPostByPostId(postId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
         return convertToDto(board);
     }
@@ -116,13 +76,13 @@ public class SecondhandBoardService {
         SecondhandBoardDto dto = new SecondhandBoardDto();
         dto.setPostId(board.getPostId());
         dto.setPlace(board.getPlace());
+        dto.setContents(board.getPost().getContents()); // ✅ Post로부터 상세 설명 가져오기
         dto.setWriteTime(board.getWriteTime());
         dto.setPhoto(board.getPhoto());
         dto.setPrice(board.getPrice());
-        dto.setRelativeTime(getRelativeTime(board.getWriteTime())); // ⬅️ 추가
+        dto.setRelativeTime(getRelativeTime(board.getWriteTime()));
         return dto;
     }
-
 
     private String getRelativeTime(Date writeTime) {
         long diffMillis = new Date().getTime() - writeTime.getTime();
@@ -134,6 +94,35 @@ public class SecondhandBoardService {
         long days = hours / 24;
         return days + "일 전";
     }
+
+    // 새로 추가할 메서드
+    public List<SecondhandBoardDto> getBoardsByUserCampus(int userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        int campusId = user.getCampus().getCampusId();
+
+        return secondhandBoardRepository.findAllByCampusId(campusId).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<SecondhandBoardDto> searchBoardsByCampusAndQuery(int userId, String query) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        int campusId = user.getCampus().getCampusId();
+
+        return secondhandBoardRepository.searchByCampusAndText(campusId, query).stream()
+                .filter(board -> {
+                    String title = board.getPost().getTitle().toLowerCase();
+                    String contents = board.getPost().getContents().toLowerCase();
+                    String keyword = query.toLowerCase();
+
+                    return title.contains(keyword) || contents.contains(keyword);
+                })
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
 
 
 

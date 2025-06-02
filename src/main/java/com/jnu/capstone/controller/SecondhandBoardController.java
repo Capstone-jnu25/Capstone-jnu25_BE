@@ -5,9 +5,11 @@ import com.jnu.capstone.dto.SecondhandBoardDto;
 import com.jnu.capstone.service.SecondhandBoardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.jnu.capstone.util.JwtTokenProvider;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/secondhand")
@@ -21,7 +23,7 @@ public class SecondhandBoardController {
 
     // 게시글 등록
     @PostMapping
-    public String createBoard(@RequestBody SecondhandBoardCreateRequestDto dto,
+        public String createBoard(@RequestBody SecondhandBoardCreateRequestDto dto,
                               @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
 
         String token = authorizationHeader.replace("Bearer ", "");
@@ -33,8 +35,16 @@ public class SecondhandBoardController {
 
     // 전체 목록 조회
     @GetMapping
-    public List<SecondhandBoardDto> getAllBoards() {
-        return secondhandBoardService.getAllBoards();
+    public ResponseEntity<?> getAllBoards(@RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        int userId = jwtTokenProvider.getUserIdFromToken(token);
+
+        List<SecondhandBoardDto> boards = secondhandBoardService.getBoardsByUserCampus(userId);
+
+        return ResponseEntity.ok(Map.of(
+                "status", "success",
+                "data", boards
+        ));
     }
 
     // 게시글 상세 조회
@@ -42,43 +52,22 @@ public class SecondhandBoardController {
     public SecondhandBoardDto getBoardById(@PathVariable int postId) {
         return secondhandBoardService.getBoardByPostId(postId);
     }
+
+    // 검색기능(text검색)
+    @GetMapping("/search")
+    public ResponseEntity<?> searchBoards(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestParam("query") String query
+    ) {
+        String token = authHeader.replace("Bearer ", "");
+        int userId = jwtTokenProvider.getUserIdFromToken(token);
+
+        List<SecondhandBoardDto> result = secondhandBoardService.searchBoardsByCampusAndQuery(userId, query);
+
+        return ResponseEntity.ok(Map.of(
+                "status", "success",
+                "data", result
+        ));
+    }
+
 }
-
-
-//package com.jnu.capstone.controller;
-//
-//import com.jnu.capstone.entity.SecondhandBoard;
-//import com.jnu.capstone.dto.SecondhandBoardCreateRequestDto;
-//import com.jnu.capstone.repository.SecondhandBoardRepository;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.web.bind.annotation.*;
-//
-//import java.util.List;
-//
-//@RestController
-//@RequestMapping("/api/secondhandboards")
-//public class SecondhandBoardController {
-//
-//    @Autowired
-//    private SecondhandBoardRepository secondhandBoardRepository;
-//
-//    @GetMapping
-//    public List<SecondhandBoard> getAllSecondhandBoards() {
-//        return secondhandBoardRepository.findAll();
-//    }
-//
-//    @PostMapping
-//    public SecondhandBoard createSecondhandBoard(@RequestBody SecondhandBoardCreateRequestDto requestDto) {
-//        SecondhandBoard secondhandBoard = new SecondhandBoard();
-//        secondhandBoard.setPlace(requestDto.getPlace());
-//        secondhandBoard.setWriteTime(requestDto.getWriteTime());
-//        secondhandBoard.setPhoto(requestDto.getPhoto());
-//        secondhandBoard.setPrice(requestDto.getPrice());
-//        return secondhandBoardRepository.save(secondhandBoard);
-//    }
-//
-//    @DeleteMapping("/{id}")
-//    public void deleteSecondhandBoard(@PathVariable int id) {
-//        secondhandBoardRepository.deleteById(id);
-//    }
-//}

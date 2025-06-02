@@ -9,6 +9,7 @@ public class SecondhandBoardDto {
     private String photo;
     private int price;
     private String relativeTime;
+    private String contents;  // 추가
 
     // Getters and Setters
     public int getPostId() { return postId; }
@@ -16,6 +17,9 @@ public class SecondhandBoardDto {
 
     public String getPlace() { return place; }
     public void setPlace(String place) { this.place = place; }
+
+    public String getContents() { return contents; }
+    public void setContents(String contents) { this.contents = contents; }
 
     public Date getWriteTime() { return writeTime; }
     public void setWriteTime(Date writeTime) { this.writeTime = writeTime; }

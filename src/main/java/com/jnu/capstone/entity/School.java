@@ -1,5 +1,6 @@
 package com.jnu.capstone.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -14,7 +15,7 @@ public class School {
     @Column(name = "campus_name", nullable = false, length = 100)
     private String campusName;
 
-    @Column(nullable = false, columnDefinition = "DECIMAL(10,8)")
+    @Column(nullable = false, columnDefinition = "DECIMAL(11,8)")
     private double latitude;
 
     @Column(nullable = false, columnDefinition = "DECIMAL(11,8)")
