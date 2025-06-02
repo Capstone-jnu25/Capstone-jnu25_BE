@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface KeywordRepository extends JpaRepository<Keyword, Integer> {
     List<Keyword> findByUser_UserIdAndBoardType(int userId, BoardType boardType);
+    List<Keyword> findByBoardType(BoardType boardType);
 }

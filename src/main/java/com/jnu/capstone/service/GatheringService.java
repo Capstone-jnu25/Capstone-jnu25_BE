@@ -9,9 +9,11 @@ import com.jnu.capstone.entity.GatheringBoard;
 import com.jnu.capstone.entity.GenderType;
 import com.jnu.capstone.entity.Post;
 import com.jnu.capstone.entity.User;
+import com.jnu.capstone.entity.Keyword;
 import com.jnu.capstone.entity.Chatroom;
 import com.jnu.capstone.entity.ChatJoin;
 import com.jnu.capstone.repository.GatheringBoardRepository;
+import com.jnu.capstone.repository.KeywordRepository;
 import com.jnu.capstone.repository.PostRepository;
 import com.jnu.capstone.repository.UserRepository;
 import com.jnu.capstone.repository.ApplicantRepository;
@@ -22,6 +24,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.stream.Collectors;
+import java.util.List;
 
 @Service
 public class GatheringService {
@@ -37,6 +42,11 @@ public class GatheringService {
     private ChatroomRepository chatroomRepository;
     @Autowired
     private ChatJoinRepository chatJoinRepository;
+    @Autowired
+    private KeywordRepository keywordRepository;
+
+    @Autowired
+    private FcmService fcmService;
     public Page<PostResponseDto> getGatheringPosts(int userId, String boardType, Pageable pageable) {
         // String -> Enum 변환
         BoardType type = BoardType.valueOf(boardType.toUpperCase());
@@ -158,6 +168,24 @@ public class GatheringService {
         gatheringBoard.setPost(post);
 
         postRepository.save(post);
+
+        // 🔍 키워드 매칭 및 알림 전송
+        List<Keyword> matchedKeywords = keywordRepository.findByBoardType(boardType).stream()
+                .filter(k -> post.getTitle().contains(k.getKeywordText()) ||
+                        post.getContents().contains(k.getKeywordText()))
+                .collect(Collectors.toList());
+
+        matchedKeywords.stream()
+                .map(Keyword::getUser)
+                .filter(u -> u.getFcmToken() != null && u.getUserId() != userId) // 작성자 제외
+                .forEach(u -> {
+                    fcmService.sendMessageTo(
+                            u.getFcmToken(),
+                            "🔔 관심 키워드 알림",
+                            "‘" + post.getTitle() + "’ 게시글이 등록되었습니다!"
+                    );
+                });
+
 
         // 채팅방 생성 (게시글과 연관 설정)
         Chatroom chatroom = new Chatroom();

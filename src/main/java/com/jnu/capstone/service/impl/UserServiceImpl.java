@@ -76,6 +76,15 @@ public class UserServiceImpl implements UserService {
         // 로그인 응답 생성
         return new LoginResponseDto(user.getUserId(), user.getEmail(), user.getNickname(), token, latitude, longitude);
     }
+    // UserServiceImpl.java
+    @Override
+    public void updateFcmToken(int userId, String fcmToken) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
+        user.setFcmToken(fcmToken);
+        userRepository.save(user);
+    }
+
 
 
 //    @Override
