@@ -4,12 +4,13 @@ import com.jnu.capstone.dto.*;
 import com.jnu.capstone.service.UserService;
 import com.jnu.capstone.util.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.jnu.capstone.dto.LoginRequestDto;
 import com.jnu.capstone.dto.LoginResponseDto;
-
+import com.jnu.capstone.util.JwtTokenProvider;
 
 
 @RestController
@@ -17,6 +18,9 @@ import com.jnu.capstone.dto.LoginResponseDto;
 public class UserController {
     @Autowired
     private UserService userService;
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
@@ -45,12 +49,31 @@ public class UserController {
         return ResponseEntity.ok(userService.updateUser(userId, requestDto));
     }
 
-    // 비밀번호 변경
+
     @PutMapping("/{userId}/password")
-    public ResponseEntity<Void> changePassword(@PathVariable int userId, @RequestBody PasswordChangeRequestDto requestDto) {
+    public ResponseEntity<Void> changePassword(
+            @PathVariable int userId,
+            @RequestBody PasswordChangeRequestDto requestDto,
+            @RequestHeader("Authorization") String token
+    ) {
+        String jwt = token.replace("Bearer ", "");
+        int tokenUserId = jwtTokenProvider.getUserIdFromToken(jwt);
+
+        if (tokenUserId != userId) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 권한 없음
+        }
+
         userService.changePassword(userId, requestDto);
         return ResponseEntity.noContent().build();
     }
+
+
+//    // 비밀번호 변경 (JWT고려하지 않은 거.)
+//    @PutMapping("/{userId}/password")
+//    public ResponseEntity<Void> changePassword(@PathVariable int userId, @RequestBody PasswordChangeRequestDto requestDto) {
+//        userService.changePassword(userId, requestDto);
+//        return ResponseEntity.noContent().build();
+//    }
 
 //    // 프로필 사진 변경
 //    @PutMapping("/{userId}/profile")

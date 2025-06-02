@@ -14,14 +14,14 @@ public class SecondhandBoard {
 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
-    @JoinColumn(name = "post_id")
+    @JoinColumn(name = "post_id") // FK + PK
     private Post post;
 
     @Column(name = "place", nullable = false, length = 40)
     private String place;
 
     @Column(name = "write_time", nullable = false)
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)  // ✅ 시간까지 저장
     private Date writeTime;
 
     @Column(name = "photo", nullable = false, length = 255)

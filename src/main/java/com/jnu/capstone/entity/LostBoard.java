@@ -19,9 +19,13 @@ public class LostBoard {
     @Column(name = "place", nullable = false, length = 40)
     private String place;
 
+
     @Column(name = "write_time", nullable = false)
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)  // ✅ 시간까지 저장
     private Date writeTime;
+//    @Column(name = "write_time", nullable = false)
+//    @Temporal(TemporalType.DATE)
+//    private Date writeTime;
 
     @Column(name = "photo", nullable = false, length = 255)
     private String photo;
@@ -30,11 +34,11 @@ public class LostBoard {
     private boolean isLost;
 
 //    @Column(name = "lost_latitude", precision = 10, scale = 8)
-    @Column(name = "lost_latitude", columnDefinition = "DECIMAL(10,8)")
+    @Column(name = "lost_latitude", columnDefinition = "DECIMAL(11,8)")
     private Double lostLatitude;
 
 //    @Column(name = "lost_longitude", precision = 10, scale = 8)
-    @Column(name = "lost_longitude", columnDefinition = "DECIMAL(10,8)")
+    @Column(name = "lost_longitude", columnDefinition = "DECIMAL(11,8)")
     private Double lostLongitude;
 
     // Getters and Setters
@@ -53,8 +57,14 @@ public class LostBoard {
     public String getPhoto() { return photo; }
     public void setPhoto(String photo) { this.photo = photo; }
 
+    //여기서부터
+    private boolean lost;
+
     public boolean isLost() { return isLost; }
-    public void setLost(boolean lost) { isLost = lost; }
+    public void setLost(boolean isLost) { this.isLost = isLost; }
+    //여기까지 수정함. 원래코드는 바로 밑에 써두겠음.
+    /// public boolean isLost() { return isLost; }
+    /// public void setLost(boolean lost) { isLost = lost; }
 
     public Double getLostLatitude() { return lostLatitude; }
     public void setLostLatitude(Double lostLatitude) { this.lostLatitude = lostLatitude; }

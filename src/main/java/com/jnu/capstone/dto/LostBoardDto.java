@@ -5,6 +5,7 @@ import java.util.Date;
 public class LostBoardDto {
     private int postId;
     private String place;
+    private String contents;  // 추가
     private Date writeTime;
     private String photo;
     private boolean isLost;
@@ -22,6 +23,9 @@ public class LostBoardDto {
 
     public String getPlace() { return place; }
     public void setPlace(String place) { this.place = place; }
+
+    public String getContents() { return contents; }
+    public void setContents(String contents) { this.contents = contents; }
 
     public Date getWriteTime() { return writeTime; }
     public void setWriteTime(Date writeTime) { this.writeTime = writeTime; }
