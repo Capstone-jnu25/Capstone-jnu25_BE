@@ -2,6 +2,7 @@ package com.jnu.capstone.controller;
 
 import com.jnu.capstone.dto.*;
 import com.jnu.capstone.service.UserService;
+import com.jnu.capstone.util.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +15,10 @@ import com.jnu.capstone.dto.LoginResponseDto;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-
     @Autowired
     private UserService userService;
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
 
     // 로그인
     @PostMapping("/login")
@@ -99,5 +101,17 @@ public class UserController {
         return ResponseEntity.ok("이메일 인증이 완료되었습니다.");
     }
 
+    // ✅ FCM 토큰 저장 API
+    @PostMapping("/fcm-token")
+    public ResponseEntity<String> saveFcmToken(
+            @RequestHeader("Authorization") String token,
+            @RequestBody FcmTokenRequestDto requestDto) {
+
+        String jwt = token.replace("Bearer ", "");
+        int userId = jwtTokenProvider.getUserIdFromToken(jwt);
+
+        userService.updateFcmToken(userId, requestDto.getFcmToken());
+        return ResponseEntity.ok("FCM 토큰이 저장되었습니다.");
+    }
 
 }

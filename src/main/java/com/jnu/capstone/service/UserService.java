@@ -25,7 +25,7 @@ public interface UserService {
     // 이메일 인증 기능
     void sendVerificationEmail(EmailVerificationRequestDto requestDto);
     void verifyEmailCode(EmailVerificationCodeRequestDto requestDto);
-
+    void updateFcmToken(int userId, String fcmToken);
     // 이메일 인증 상태 확인
     boolean isEmailVerified(String email);
 }

@@ -43,6 +43,8 @@ public class User {
     @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
     private boolean emailVerified = false;  // 이메일 인증 여부
 
+    @Column(nullable = true, length = 255)
+    private String fcmToken;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts;
 
@@ -65,6 +67,13 @@ public class User {
     public void setGoodCount(int goodCount) { this.goodCount = goodCount; }
     public int getBadCount() { return badCount; }
     public void setBadCount(int badCount) { this.badCount = badCount; }
+    public String getFcmToken() {
+        return fcmToken;
+    }
+
+    public void setFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
+    }
     public List<Post> getPosts() { return posts; }
     public void setPosts(List<Post> posts) { this.posts = posts; }
 //    public String getProfileImageUrl() { return profileImageUrl; }
