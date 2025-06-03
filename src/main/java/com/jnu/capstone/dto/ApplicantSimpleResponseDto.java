@@ -3,9 +3,11 @@ package com.jnu.capstone.dto;
 import com.jnu.capstone.entity.Applicant;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class ApplicantSimpleResponseDto {
     private int applicantId;
     private String nickname;
