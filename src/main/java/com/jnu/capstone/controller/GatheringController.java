@@ -44,11 +44,16 @@ public class GatheringController {
         Pageable pageable = PageRequest.of(page, size);
 
         // 서비스 호출
-        Page<PostResponseDto> posts = gatheringService.getGatheringPosts(userId, boardType, pageable);
+        Page<PostResponseDto> postsPage = gatheringService.getGatheringPosts(userId, boardType, pageable);
 
         Map<String, Object> response = Map.of(
                 "status", "success",
-                "data", posts
+                "data", postsPage.getContent(), // ✅ content만 반환
+                "meta", Map.of(               // ✅ 필요한 메타 정보만 반환
+                        "page", postsPage.getNumber(),
+                        "size", postsPage.getSize(),
+                        "totalElements", postsPage.getTotalElements()
+                )
         );
 
         return ResponseEntity.ok(response);
