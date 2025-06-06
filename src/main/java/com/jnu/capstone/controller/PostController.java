@@ -2,13 +2,19 @@
 package com.jnu.capstone.controller;
 
 import com.jnu.capstone.dto.MyPostSimpleDto;
+import com.jnu.capstone.dto.PostResponseDto;
 import com.jnu.capstone.entity.Post;
+import com.jnu.capstone.entity.BoardType;
 import com.jnu.capstone.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.jnu.capstone.util.JwtTokenProvider;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 import java.util.Map;
@@ -78,5 +84,60 @@ public class PostController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<Map<String, Object>> searchPosts(
+            @RequestHeader("Authorization") String token,
+            @RequestParam String keyword,
+            @RequestParam List<String> boardType,
+            @RequestParam int page,
+            @RequestParam int size) {
 
+        String jwt = token.replace("Bearer ", "");
+        int userId = jwtTokenProvider.getUserIdFromToken(jwt);
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "postId"));
+
+        List<BoardType> boardTypes = boardType.stream()
+                .map(String::toUpperCase)
+                .map(BoardType::valueOf)
+                .toList();
+
+        Page<Post> resultPage = postService.searchPostsByCampusAndKeyword(userId, keyword, boardTypes, pageable);
+
+        List<PostResponseDto> dtoList = resultPage.stream().map(post -> {
+            var g = post.getGatheringBoard();
+            return new PostResponseDto(
+                    post.getPostId(),
+                    post.getTitle(),
+                    post.getContents(),
+                    g.getPlace(),
+                    g.getMeetTime(),
+                    g.getDueDate(),
+                    g.getGender().name(),
+                    g.getMaxParticipants(),
+                    g.getCurrentParticipants(),
+                    post.getBoardType().name(),
+                    isClosed(g),
+                    PostResponseDto.calculateDDay(g.getDueDate())
+            );
+        }).toList();
+
+        Map<String, Object> response = Map.of(
+                "status", "success",
+                "data", dtoList,
+                "meta", Map.of(
+                        "page", resultPage.getNumber(),
+                        "size", resultPage.getSize(),
+                        "totalElements", resultPage.getTotalElements()
+                )
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ✅ 여기 추가
+    private boolean isClosed(com.jnu.capstone.entity.GatheringBoard g) {
+        if (g.getDueDate().isBefore(java.time.LocalDate.now())) return true;
+        return g.isAutomatic() && g.getCurrentParticipants() >= g.getMaxParticipants();
+    }
 }

@@ -1,7 +1,10 @@
 package com.jnu.capstone.service;
 
 import com.jnu.capstone.dto.MyPostSimpleDto;
+import com.jnu.capstone.entity.BoardType;
 import com.jnu.capstone.entity.Post;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Map;
@@ -15,4 +18,6 @@ public interface PostService {
     void deletePost(int postId);
 
     Map<String, List<MyPostSimpleDto>> getMyPostsGroupedByBoardType(int userId);
+    Page<Post> searchPostsByCampusAndKeyword(int userId, String keyword, List<BoardType> boardTypes, Pageable pageable);
+
 }
