@@ -3,10 +3,12 @@ package com.jnu.capstone.dto;
 import com.jnu.capstone.entity.Applicant;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 // 신청자 목록 조회 DTO
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 // 신청자 목록 조회 DTO
 public class ApplicantResponseDto {
     private int applicantId;

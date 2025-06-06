@@ -2,8 +2,12 @@ package com.jnu.capstone.dto;
 
 import com.jnu.capstone.entity.User;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Data
+@Getter
+@Setter
 public class UserResponseDto {
     private int userId;
     private String email;
