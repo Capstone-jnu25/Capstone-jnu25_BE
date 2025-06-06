@@ -81,6 +81,8 @@ public class SecondhandBoardService {
         dto.setPhoto(board.getPhoto());
         dto.setPrice(board.getPrice());
         dto.setRelativeTime(getRelativeTime(board.getWriteTime()));
+        dto.setNickname(board.getPost().getUser().getNickname()); // ✅ 닉네임 설정
+        dto.setTitle(board.getPost().getTitle());
         return dto;
     }
 
@@ -111,17 +113,11 @@ public class SecondhandBoardService {
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         int campusId = user.getCampus().getCampusId();
 
-        return secondhandBoardRepository.searchByCampusAndText(campusId, query).stream()
-                .filter(board -> {
-                    String title = board.getPost().getTitle().toLowerCase();
-                    String contents = board.getPost().getContents().toLowerCase();
-                    String keyword = query.toLowerCase();
-
-                    return title.contains(keyword) || contents.contains(keyword);
-                })
+        return secondhandBoardRepository.searchByCampusAndQuery(campusId, query).stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
+
 
 
 

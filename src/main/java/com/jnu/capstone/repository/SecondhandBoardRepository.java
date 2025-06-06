@@ -1,5 +1,6 @@
 package com.jnu.capstone.repository;
 
+import com.jnu.capstone.entity.Post;
 import com.jnu.capstone.entity.SecondhandBoard;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -25,9 +26,12 @@ public interface SecondhandBoardRepository extends JpaRepository<SecondhandBoard
     List<SecondhandBoard> findAllByCampusId(@Param("campusId") int campusId);
 
     @Query("SELECT s FROM SecondhandBoard s JOIN FETCH s.post p " +
-            "WHERE p.campus.campusId = :campusId AND " +
+            "WHERE p.campus.campusId = :campusId AND p.isDeleted = false AND " +
             "(LOWER(p.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
             "OR LOWER(p.contents) LIKE LOWER(CONCAT('%', :query, '%')))")
-    List<SecondhandBoard> searchByCampusAndText(@Param("campusId") int campusId, @Param("query") String query);
+    List<SecondhandBoard> searchByCampusAndQuery(@Param("campusId") int campusId,
+                                                 @Param("query") String query);
 
+    void deleteByPost(Post post);
 }
+

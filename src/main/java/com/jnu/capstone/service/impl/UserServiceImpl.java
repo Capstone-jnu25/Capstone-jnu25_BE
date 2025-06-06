@@ -1,13 +1,14 @@
 package com.jnu.capstone.service.impl;
 
+import java.util.List;
 import java.util.Map;
 import com.jnu.capstone.dto.LoginRequestDto;
 import com.jnu.capstone.dto.LoginResponseDto;
 import com.jnu.capstone.dto.*;
+import com.jnu.capstone.entity.Post;
 import com.jnu.capstone.entity.School;
 import com.jnu.capstone.entity.User;
-import com.jnu.capstone.repository.SchoolRepository;
-import com.jnu.capstone.repository.UserRepository;
+import com.jnu.capstone.repository.*;
 import com.jnu.capstone.service.UserService;
 import com.jnu.capstone.util.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,11 +43,24 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private SchoolRepository schoolRepository;
 
+
     @Autowired
     private RestTemplate restTemplate;
 
     @Autowired
     private EmailVerificationService emailVerificationService;
+
+    @Autowired
+    private PostRepository postRepository;
+
+    @Autowired
+    private SecondhandBoardRepository secondhandBoardRepository;
+
+    @Autowired
+    private LostBoardRepository lostBoardRepository;
+
+    @Autowired
+    private GatheringBoardRepository gatheringBoardRepository;
 
 //    @Autowired
 //    private UserService userService;
@@ -282,6 +296,18 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(int userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        List<Post> posts = postRepository.findByUser_UserId(userId);
+
+        for (Post post : posts) {
+            // 게시판 테이블에서 먼저 삭제
+            secondhandBoardRepository.deleteByPost(post);
+            lostBoardRepository.deleteByPost(post);
+            gatheringBoardRepository.deleteByPost(post);
+
+            // 게시글 삭제
+            postRepository.delete(post);
+        }
 
         userRepository.delete(user);
     }
