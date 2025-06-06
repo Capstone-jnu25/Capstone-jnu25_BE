@@ -1,6 +1,7 @@
 package com.jnu.capstone.repository;
 
 import com.jnu.capstone.entity.LostBoard;
+import com.jnu.capstone.entity.Post;
 import com.jnu.capstone.entity.SecondhandBoard;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -37,4 +38,5 @@ public interface LostBoardRepository extends JpaRepository<LostBoard, Integer> {
                                                  @Param("isLost") boolean isLost);
 
 
+    void deleteByPost(Post post);
 }

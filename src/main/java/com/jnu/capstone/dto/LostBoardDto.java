@@ -4,6 +4,8 @@ import java.util.Date;
 
 public class LostBoardDto {
     private int postId;
+    private String title;
+    private String nickname; // 작성자 닉네임
     private String place;
     private String contents;  // 추가
     private Date writeTime;
@@ -17,6 +19,12 @@ public class LostBoardDto {
     // Getters and Setters
     public String getRelativeTime() { return relativeTime; }
     public void setRelativeTime(String relativeTime) { this.relativeTime = relativeTime; }
+
+    public String getTitle(){ return title; }
+    public void setTitle(String title) { this.title = title; }
+
+    public String getNickname(){ return nickname; }
+    public void setNickname(String nickname) { this.nickname = nickname; }
 
     public int getPostId() { return postId; }
     public void setPostId(int postId) { this.postId = postId; }

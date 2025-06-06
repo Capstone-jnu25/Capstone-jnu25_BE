@@ -100,6 +100,8 @@ public class LostBoardService {
         dto.setLostLatitude(board.getLostLatitude());
         dto.setLostLongitude(board.getLostLongitude());
         dto.setRelativeTime(getRelativeTime(board.getWriteTime()));
+        dto.setNickname(board.getPost().getUser().getNickname());
+        dto.setTitle(board.getPost().getTitle());
         return dto;
     }
 
@@ -150,16 +152,9 @@ public class LostBoardService {
         int campusId = user.getCampus().getCampusId();
 
         return lostBoardRepository.searchByCampusAndTextAndType(campusId, query, isLost).stream()
-                .filter(item -> {
-                    String title = item.getPost().getTitle().toLowerCase();
-                    String contents = item.getPost().getContents().toLowerCase();
-                    String keyword = query.toLowerCase();
-
-                    // 제목 또는 내용에 정확히 "아이"가 포함된 경우만 통과
-                    return title.contains(keyword) || contents.contains(keyword);
-                })
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
+
     }
 
 
