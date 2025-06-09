@@ -16,8 +16,10 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
 
     // ✅ 사용자 ID로 게시글 목록 조회
     List<Post> findByUser_UserId(int userId);
+    @EntityGraph(attributePaths = {"gatheringBoard"})
     @Query("SELECT p FROM Post p WHERE " +
             "p.campus.campusId = :campusId AND " +
+            "p.isDeleted = false AND " +
             "(LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(p.contents) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
             "p.boardType IN :boardTypes")
