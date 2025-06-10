@@ -19,6 +19,7 @@ import com.jnu.capstone.repository.UserRepository;
 import com.jnu.capstone.repository.ApplicantRepository;
 import com.jnu.capstone.repository.ChatroomRepository;
 import com.jnu.capstone.repository.ChatJoinRepository;
+import com.jnu.capstone.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,6 +45,8 @@ public class GatheringService {
     private ChatJoinRepository chatJoinRepository;
     @Autowired
     private KeywordRepository keywordRepository;
+    @Autowired
+    private NotificationService notificationService;
 
     @Autowired
     private FcmService fcmService;
@@ -169,23 +172,15 @@ public class GatheringService {
 
         postRepository.save(post);
 
-        // 🔍 키워드 매칭 및 알림 전송
-        List<Keyword> matchedKeywords = keywordRepository.findByBoardType(boardType).stream()
-                .filter(k -> post.getTitle().contains(k.getKeywordText()) ||
-                        post.getContents().contains(k.getKeywordText()))
-                .collect(Collectors.toList());
-
-        matchedKeywords.stream()
-                .map(Keyword::getUser)
-                .filter(u -> u.getFcmToken() != null && u.getUserId() != userId) // 작성자 제외
-                .forEach(u -> {
-                    fcmService.sendMessageTo(
-                            u.getFcmToken(),
-                            "🔔 관심 키워드 알림",
-                            "‘" + post.getTitle() + "’ 게시글이 등록되었습니다!"
-                    );
-                });
-
+        if (boardType == BoardType.STUDY || boardType == BoardType.MEETUP) {
+            notificationService.notifyMatchingUsersByTitleOrContent(
+                    post.getTitle(),
+                    post.getContents(),
+                    boardType,
+                    post.getPostId(),
+                    user.getUserId()
+            );
+        }
 
         // 채팅방 생성 (게시글과 연관 설정)
         Chatroom chatroom = new Chatroom();

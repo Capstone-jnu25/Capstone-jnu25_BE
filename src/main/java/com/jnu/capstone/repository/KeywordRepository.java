@@ -12,4 +12,5 @@ public interface KeywordRepository extends JpaRepository<Keyword, Integer> {
     // 🔹 전체 키워드 목록 (게시판 타입 상관없이)
     List<Keyword> findByUser_UserId(int userId);
     List<Keyword> findByBoardType(BoardType boardType);
+    List<Keyword> findByKeywordTextAndBoardType(String keywordText, BoardType boardType);
 }
