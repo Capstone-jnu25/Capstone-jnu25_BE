@@ -1,6 +1,7 @@
 package com.jnu.capstone.controller;
 
 import com.jnu.capstone.dto.*;
+import com.jnu.capstone.repository.UserRepository;
 import com.jnu.capstone.service.UserService;
 import com.jnu.capstone.util.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,18 +14,20 @@ import com.jnu.capstone.dto.LoginResponseDto;
 import com.jnu.capstone.util.JwtTokenProvider;
 
     import java.util.List;
+import java.util.Map;
 
 
-    @RestController
+@RestController
     @RequestMapping("/api/users")
     public class UserController {
         @Autowired
         private UserService userService;
         @Autowired
         private JwtTokenProvider jwtTokenProvider;
+        @Autowired
+        private UserRepository userRepository;
 
-
-        // 로그인
+    // 로그인
         @PostMapping("/login")
         public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto requestDto) {
             LoginResponseDto responseDto = userService.login(requestDto);
@@ -144,6 +147,21 @@ import com.jnu.capstone.util.JwtTokenProvider;
 
             userService.updateFcmToken(userId, requestDto.getFcmToken());
             return ResponseEntity.ok("FCM 토큰이 저장되었습니다.");
+        }
+        @GetMapping("/fcm-token")
+        public ResponseEntity<?> getFcmToken(@RequestHeader("Authorization") String tokenHeader) {
+            String token = tokenHeader.replace("Bearer ", "");
+            int userId = jwtTokenProvider.getUserIdFromToken(token);
+
+            return userRepository.findById(userId)
+                    .map(user -> ResponseEntity.ok(Map.of(
+                            "status", "success",
+                            "data", user.getFcmToken()
+                    )))
+                    .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                            "status", "fail",
+                            "message", "사용자를 찾을 수 없습니다."
+                    )));
         }
 
     }
