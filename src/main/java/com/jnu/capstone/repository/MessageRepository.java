@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long> {
-    @Query("SELECT m FROM Message m JOIN FETCH m.sender WHERE m.chatroom = :chatroom ORDER BY m.sendTime ASC")
+    @Query("SELECT m FROM Message m JOIN FETCH m.sender WHERE m.chatroom = :chatroom ORDER BY m.sendTime DESC")
     Page<Message> findByChatroomWithSender(@Param("chatroom") Chatroom chatroom, Pageable pageable);
 
     Optional<Message> findTopByChatroomOrderBySendTimeDesc(Chatroom chatroom);
