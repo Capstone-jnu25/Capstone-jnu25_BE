@@ -95,7 +95,8 @@ public class GatheringService {
                             gatheringBoard.getCurrentParticipants(),
                             gatheringBoard.getBoardType().toString(),
                             isClosed,
-                            dDayText
+                            dDayText,
+                            gatheringBoard.getPost().getUser().getUserId()
                     );
                 });
     }
