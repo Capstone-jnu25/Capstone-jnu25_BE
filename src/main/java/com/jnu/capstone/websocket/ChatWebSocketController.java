@@ -33,6 +33,9 @@ public class ChatWebSocketController {
     private final FcmService fcmService; // ✅ FCM 전송 서비스 추가
     @MessageMapping("/chat/send") // 클라이언트에서 보내는 주소: /app/chat/send
     public void handleMessage(@Payload Map<String, String> payload) {
+        System.out.println("🧪 WebSocket 메시지 수신 시도");
+        System.out.println("🧪 Payload: " + payload);
+
         String token = payload.get("token");
         int chattingRoomId = Integer.parseInt(payload.get("chattingRoomId"));
         String detailMessage = payload.get("detailMessage");
