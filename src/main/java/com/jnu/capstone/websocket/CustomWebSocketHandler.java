@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -28,7 +30,9 @@ public class CustomWebSocketHandler extends TextWebSocketHandler {
     // 클라이언트와 연결된 세션들 저장 (채팅방 ID로 그룹핑)
     private final Map<Integer, List<WebSocketSession>> roomSessions = new HashMap<>();
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
