@@ -4,6 +4,7 @@ import java.util.Date;
 
 public class SecondhandBoardDto {
     private int postId;
+    private int userId;
     private String title;
     private String nickname;
     private String place;
@@ -19,6 +20,9 @@ public class SecondhandBoardDto {
 
     public String getTitle(){ return title; }
     public void setTitle(String title) { this.title = title; }
+
+    public int getUserId(){ return userId; }
+    public void setUserId(int userId) { this.userId = userId; }
 
     public String getNickname() { return nickname; }
     public void setNickname(String nickname) { this.nickname = nickname; }

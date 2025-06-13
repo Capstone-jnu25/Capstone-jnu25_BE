@@ -1,8 +1,8 @@
 package com.jnu.capstone.scheduler;
 
-import com.jnu.capstone.entity.Post;
 import com.jnu.capstone.entity.BoardType;
 import com.jnu.capstone.entity.GatheringBoard;
+import com.jnu.capstone.entity.Post;
 import com.jnu.capstone.repository.GatheringBoardRepository;
 import com.jnu.capstone.repository.PostRepository;
 import lombok.RequiredArgsConstructor;

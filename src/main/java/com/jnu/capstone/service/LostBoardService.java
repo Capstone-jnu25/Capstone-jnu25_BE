@@ -102,6 +102,7 @@ public class LostBoardService {
         dto.setRelativeTime(getRelativeTime(board.getWriteTime()));
         dto.setNickname(board.getPost().getUser().getNickname());
         dto.setTitle(board.getPost().getTitle());
+        dto.setUserId(board.getPost().getUser().getUserId()); // ✅ 닉네임 설정
         return dto;
     }
 

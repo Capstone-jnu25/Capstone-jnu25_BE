@@ -3,8 +3,8 @@ package com.jnu.capstone.controller;
 
 import com.jnu.capstone.dto.MyPostSimpleDto;
 import com.jnu.capstone.dto.PostResponseDto;
-import com.jnu.capstone.entity.Post;
 import com.jnu.capstone.entity.BoardType;
+import com.jnu.capstone.entity.Post;
 import com.jnu.capstone.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

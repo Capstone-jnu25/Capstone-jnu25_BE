@@ -41,20 +41,4 @@ public class CapstoneApplication {
 			System.err.println("❌ Firebase 초기화 실패: " + e.getMessage());
 		}
 	}
-//	@Bean
-//	public CommandLineRunner testInsert(UserRepository userRepository) {
-//		return args -> {
-//			User user = new User();
-//			user.setUserId(1);
-//			user.setEmail("test@example.com");
-//			user.setPword("pass123");
-//			user.setNickname("tester");
-//			user.setCampus("전남대학교");
-//			user.setDepartment("인공지능학부");
-//			user.setStudentNum(2222222);
-//
-//			userRepository.save(user);xp
-//			System.out.println("사용자 저장 완료!");
-//		};
-//	}
 }

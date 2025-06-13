@@ -1,6 +1,5 @@
 package com.jnu.capstone.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.List;
 

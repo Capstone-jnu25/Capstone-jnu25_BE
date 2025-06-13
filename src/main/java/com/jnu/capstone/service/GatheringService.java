@@ -9,7 +9,6 @@ import com.jnu.capstone.entity.GatheringBoard;
 import com.jnu.capstone.entity.GenderType;
 import com.jnu.capstone.entity.Post;
 import com.jnu.capstone.entity.User;
-import com.jnu.capstone.entity.Keyword;
 import com.jnu.capstone.entity.Chatroom;
 import com.jnu.capstone.entity.ChatJoin;
 import com.jnu.capstone.repository.GatheringBoardRepository;
@@ -19,15 +18,11 @@ import com.jnu.capstone.repository.UserRepository;
 import com.jnu.capstone.repository.ApplicantRepository;
 import com.jnu.capstone.repository.ChatroomRepository;
 import com.jnu.capstone.repository.ChatJoinRepository;
-import com.jnu.capstone.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.stream.Collectors;
-import java.util.List;
 
 @Service
 public class GatheringService {

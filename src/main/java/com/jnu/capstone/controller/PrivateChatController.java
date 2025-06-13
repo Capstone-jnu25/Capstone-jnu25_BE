@@ -1,8 +1,6 @@
 package com.jnu.capstone.controller;
 
 import com.jnu.capstone.dto.PrivateChatResponseDto;
-import com.jnu.capstone.entity.*;
-import com.jnu.capstone.repository.*;
 import com.jnu.capstone.service.PrivateChatService;
 import com.jnu.capstone.util.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;

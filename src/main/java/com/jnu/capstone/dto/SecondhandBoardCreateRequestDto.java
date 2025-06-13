@@ -1,7 +1,5 @@
 package com.jnu.capstone.dto;
 
-import java.util.Date;
-
 public class SecondhandBoardCreateRequestDto {
 //    private int postId;
     private String title;

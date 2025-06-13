@@ -1,7 +1,7 @@
 package com.jnu.capstone.entity;
 
 import jakarta.persistence.*;
-import java.util.List;
+
 import java.util.Date;
 
 // SecondhandBoard Entity

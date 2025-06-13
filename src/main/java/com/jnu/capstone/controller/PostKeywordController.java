@@ -1,7 +1,7 @@
 package com.jnu.capstone.controller;
 
-import com.jnu.capstone.entity.PostKeyword;
 import com.jnu.capstone.dto.PostKeywordCreateRequestDto;
+import com.jnu.capstone.entity.PostKeyword;
 import com.jnu.capstone.repository.PostKeywordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
