@@ -1,9 +1,7 @@
 package com.jnu.capstone.controller;
 
-import com.jnu.capstone.dto.KeywordDto;
-import com.jnu.capstone.entity.Keyword;
 import com.jnu.capstone.dto.KeywordCreateRequestDto;
-import com.jnu.capstone.repository.KeywordRepository;
+import com.jnu.capstone.dto.KeywordDto;
 import com.jnu.capstone.service.KeywordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

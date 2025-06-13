@@ -4,6 +4,7 @@ import java.util.Date;
 
 public class LostBoardDto {
     private int postId;
+    private int userId;
     private String title;
     private String nickname; // 작성자 닉네임
     private String place;
@@ -25,6 +26,9 @@ public class LostBoardDto {
 
     public String getNickname(){ return nickname; }
     public void setNickname(String nickname) { this.nickname = nickname; }
+
+    public int getUserId(){ return userId; }
+    public void setUserId(int userId) { this.userId = userId; }
 
     public int getPostId() { return postId; }
     public void setPostId(int postId) { this.postId = postId; }

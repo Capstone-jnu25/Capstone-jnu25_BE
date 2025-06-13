@@ -1,8 +1,8 @@
 package com.jnu.capstone.controller;
 
+import com.jnu.capstone.dto.GatheringDetailResponseDto;
 import com.jnu.capstone.dto.PostCreateRequestDto;
 import com.jnu.capstone.dto.PostResponseDto;
-import com.jnu.capstone.dto.GatheringDetailResponseDto;
 import com.jnu.capstone.service.GatheringService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

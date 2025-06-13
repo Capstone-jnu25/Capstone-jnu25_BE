@@ -1,6 +1,5 @@
 package com.jnu.capstone.controller;
 import com.jnu.capstone.dto.NotificationLogDto;
-import com.jnu.capstone.entity.NotificationLog;
 import com.jnu.capstone.repository.NotificationLogRepository;
 import com.jnu.capstone.util.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;

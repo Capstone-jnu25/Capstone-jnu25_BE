@@ -7,7 +7,6 @@ import com.jnu.capstone.entity.NotificationLog;
 import com.jnu.capstone.repository.UserRepository;
 import com.jnu.capstone.repository.KeywordRepository;
 import com.jnu.capstone.repository.NotificationLogRepository;
-import com.jnu.capstone.service.FcmService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

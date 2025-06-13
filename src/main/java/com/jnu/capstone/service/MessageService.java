@@ -25,7 +25,7 @@ public class MessageService {
         Chatroom chatroom = chatroomRepository.findById(chattingRoomId)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
 
-        Page<Message> messages = messageRepository.findByChatroomOrderBySendTimeAsc(chatroom, pageable);
+        Page<Message> messages = messageRepository.findByChatroomWithSender(chatroom, pageable);
 
         List<MessageResponseDto> messageDtos = messages.getContent().stream()
                 .map(m -> new MessageResponseDto(
