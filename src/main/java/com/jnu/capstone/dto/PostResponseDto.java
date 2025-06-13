@@ -18,12 +18,13 @@ public class PostResponseDto {
     private boolean isClosed;
     private String dDay;
     private int authorUserId;
+    private String nickname;
 
     // 기본 생성자
     public PostResponseDto() {}
 
     // 전체 필드 초기화 (dDay 포함)
-    public PostResponseDto(int postId, String title, String contents, String place, String time, LocalDate dueDate, String gender, int maxParticipants, int currentParticipants, String boardType, boolean isClosed, String dDay, int authorUserId) {
+    public PostResponseDto(int postId, String title, String contents, String place, String time, LocalDate dueDate, String gender, int maxParticipants, int currentParticipants, String boardType, boolean isClosed, String dDay, int authorUserId, String nickname) {
         this.postId = postId;
         this.title = title;
         this.contents = contents;
@@ -37,6 +38,7 @@ public class PostResponseDto {
         this.isClosed = isClosed;
         this.dDay = dDay;
         this.authorUserId = authorUserId;
+        this.nickname = nickname;
     }
 
     // D-Day 계산 메서드
@@ -87,4 +89,6 @@ public class PostResponseDto {
     public void setDDay(String dDay) { this.dDay = dDay; }
     public int getAuthorUserId() { return authorUserId; }
     public void setAuthorUserId(int authorUserId) { this.authorUserId = authorUserId; }
+    public String getNickname() { return nickname; }  // ✅ 추가
+    public void setNickname(String nickname) { this.nickname = nickname; }
 }

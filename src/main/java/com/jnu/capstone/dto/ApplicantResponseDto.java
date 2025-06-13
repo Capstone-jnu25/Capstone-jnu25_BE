@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 // 신청자 목록 조회 DTO
 public class ApplicantResponseDto {
     private int applicantId;
+    private int userId;
     private String nickname;
     private String department;
     private String applicationText;
@@ -20,6 +21,7 @@ public class ApplicantResponseDto {
     public static ApplicantResponseDto fromEntity(Applicant applicant) {
         return new ApplicantResponseDto(
                 applicant.getApplicantId(),
+                applicant.getUser().getUserId(),
                 applicant.getUser().getNickname(),
                 applicant.getUser().getDepartment(),
                 applicant.getApplicationText(),

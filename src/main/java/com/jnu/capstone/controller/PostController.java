@@ -119,7 +119,8 @@ public class PostController {
                     post.getBoardType().name(),
                     isClosed(g),
                     PostResponseDto.calculateDDay(g.getDueDate()),
-                    post.getUser().getUserId()
+                    post.getUser().getUserId(),
+                    post.getUser().getNickname()
             );
         }).toList();
 
