@@ -91,7 +91,8 @@ public class GatheringService {
                             gatheringBoard.getBoardType().toString(),
                             isClosed,
                             dDayText,
-                            gatheringBoard.getPost().getUser().getUserId()
+                            gatheringBoard.getPost().getUser().getUserId(),
+                            gatheringBoard.getPost().getUser().getNickname()
                     );
                 });
     }
@@ -110,6 +111,9 @@ public class GatheringService {
         boolean isClosed = gatheringBoard.getDueDate().isBefore(LocalDate.now()) ||
                 (gatheringBoard.isAutomatic() && gatheringBoard.getMaxParticipants() <= gatheringBoard.getCurrentParticipants());
 
+        Post post = gatheringBoard.getPost();
+        User author = post.getUser();
+
         return new GatheringDetailResponseDto(
                 gatheringBoard.getPost().getPostId(),
                 gatheringBoard.getPost().getTitle(),
@@ -119,7 +123,8 @@ public class GatheringService {
                 gatheringBoard.getGender().toString(),
                 gatheringBoard.getMeetTime(),
                 isClosed,
-                gatheringBoard.getPost().getUser().getUserId()
+                author.getUserId(),
+                author.getNickname()
         );
     }
 

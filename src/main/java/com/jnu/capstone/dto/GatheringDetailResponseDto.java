@@ -18,4 +18,5 @@ public class GatheringDetailResponseDto {
     private String time;
     private boolean isClosed;
     private int authorId;
+    private String nickname;
 }
