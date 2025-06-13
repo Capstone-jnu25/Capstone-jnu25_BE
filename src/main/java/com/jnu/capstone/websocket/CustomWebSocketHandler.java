@@ -1,12 +1,15 @@
 package com.jnu.capstone.websocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jnu.capstone.dto.MessageResponseDto;
 import com.jnu.capstone.entity.Chatroom;
 import com.jnu.capstone.entity.Message;
 import com.jnu.capstone.entity.User;
+import com.jnu.capstone.repository.ChatJoinRepository;
 import com.jnu.capstone.repository.ChatroomRepository;
 import com.jnu.capstone.repository.MessageRepository;
 import com.jnu.capstone.repository.UserRepository;
+import com.jnu.capstone.service.FcmService;
 import com.jnu.capstone.util.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -29,6 +32,8 @@ public class CustomWebSocketHandler extends TextWebSocketHandler {
 
     // 클라이언트와 연결된 세션들 저장 (채팅방 ID로 그룹핑)
     private final Map<Integer, List<WebSocketSession>> roomSessions = new HashMap<>();
+    private final ChatJoinRepository chatJoinRepository;
+    private final FcmService fcmService;
 
     private final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
@@ -61,14 +66,15 @@ public class CustomWebSocketHandler extends TextWebSocketHandler {
         messageRepository.save(savedMessage);
 
         // 응답 메시지 JSON 구성
-        Map<String, Object> response = new HashMap<>();
-        response.put("messageId", savedMessage.getMessageId());
-        response.put("senderId", user.getUserId());
-        response.put("senderNickname", user.getNickname());
-        response.put("detailMessage", detailMessage);
-        response.put("sendTime", savedMessage.getSendTime());
+        MessageResponseDto responseDto = new MessageResponseDto(
+                savedMessage.getMessageId(),
+                user.getUserId(),
+                user.getNickname(),
+                detailMessage,
+                savedMessage.getSendTime()
+        );
 
-        String broadcast = objectMapper.writeValueAsString(response);
+        String broadcast = objectMapper.writeValueAsString(responseDto);
 
         // 세션 저장 (채팅방별로 관리)
         roomSessions.putIfAbsent(chattingRoomId, new ArrayList<>());
@@ -82,6 +88,21 @@ public class CustomWebSocketHandler extends TextWebSocketHandler {
                 ws.sendMessage(new TextMessage(broadcast));
             }
         }
+
+        // FCM 알림 전송 (발신자 제외)
+        chatJoinRepository.findByChatroom(chatroom).stream()
+                .map(join -> join.getUser())
+                .filter(u -> u.getUserId() != userId)
+                .forEach(u -> {
+                    if (u.getFcmToken() != null && !u.getFcmToken().isEmpty()) {
+                        fcmService.sendMessageTo(
+                                u.getFcmToken(),
+                                user.getNickname(),
+                                detailMessage
+                        );
+                    }
+                });
+
 
         System.out.println("📤 메시지 전송 완료 to room " + chattingRoomId);
     }
