@@ -37,12 +37,12 @@ public class CustomWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        // 클라이언트에서 보낸 메시지 파싱
-        Map<String, String> payload = objectMapper.readValue(message.getPayload(), Map.class);
+        // ChatMessageDto 객체로 안전하게 역직렬화
+        ChatMessageDto payload = objectMapper.readValue(message.getPayload(), ChatMessageDto.class);
 
-        String token = payload.get("token");
-        int chattingRoomId = Integer.parseInt(payload.get("chattingRoomId"));
-        String detailMessage = payload.get("detailMessage");
+        String token = payload.token;
+        int chattingRoomId = payload.chattingRoomId;
+        String detailMessage = payload.detailMessage;
 
         int userId = jwtTokenProvider.getUserIdFromToken(token);
 
@@ -66,7 +66,7 @@ public class CustomWebSocketHandler extends TextWebSocketHandler {
 
         String broadcast = objectMapper.writeValueAsString(response);
 
-        // 세션 저장 (방마다 따로 관리)
+        // 세션 저장 (채팅방별로 관리)
         roomSessions.putIfAbsent(chattingRoomId, new ArrayList<>());
         if (!roomSessions.get(chattingRoomId).contains(session)) {
             roomSessions.get(chattingRoomId).add(session);
@@ -80,6 +80,13 @@ public class CustomWebSocketHandler extends TextWebSocketHandler {
         }
 
         System.out.println("📤 메시지 전송 완료 to room " + chattingRoomId);
+    }
+
+    public static class ChatMessageDto {
+        public String token;
+        public int chattingRoomId;
+        public String detailMessage;
+        public ChatMessageDto() {}
     }
 
     @Override
