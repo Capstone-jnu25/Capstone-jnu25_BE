@@ -5,12 +5,19 @@ import java.util.Map;
 import com.jnu.capstone.dto.LoginRequestDto;
 import com.jnu.capstone.dto.LoginResponseDto;
 import com.jnu.capstone.dto.*;
+import com.jnu.capstone.entity.Chatroom;
 import com.jnu.capstone.entity.Post;
 import com.jnu.capstone.entity.School;
 import com.jnu.capstone.entity.User;
 import com.jnu.capstone.repository.*;
 import com.jnu.capstone.service.UserService;
 import com.jnu.capstone.util.JwtTokenProvider;
+import com.jnu.capstone.repository.ChatroomRepository;
+import com.jnu.capstone.repository.ChatJoinRepository;
+import com.jnu.capstone.repository.MessageRepository;
+import com.jnu.capstone.repository.KeywordRepository;
+import com.jnu.capstone.repository.ApplicantRepository;
+import com.jnu.capstone.repository.NotificationLogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -55,6 +62,18 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private SecondhandBoardRepository secondhandBoardRepository;
+    @Autowired
+    private ChatroomRepository chatroomRepository;
+    @Autowired
+    private ChatJoinRepository chatJoinRepository;
+    @Autowired
+    private MessageRepository messageRepository;
+    @Autowired
+    private KeywordRepository keywordRepository;
+    @Autowired
+    private ApplicantRepository applicantRepository;
+    @Autowired
+    private NotificationLogRepository notificationLogRepository;
 
     @Autowired
     private LostBoardRepository lostBoardRepository;
@@ -300,6 +319,19 @@ public class UserServiceImpl implements UserService {
         List<Post> posts = postRepository.findByUser_UserId(userId);
 
         for (Post post : posts) {
+            int postId = post.getPostId();
+
+            // ✅ 채팅방이 있다면 본인의 참여 정보만 제거
+            Optional<Chatroom> chatroomOpt = chatroomRepository.findByPost_PostId(postId);
+            chatroomOpt.ifPresent(chatroom -> {
+                int roomId = chatroom.getChattingRoomId();
+
+                chatroom.setPost(null);
+                chatroomRepository.save(chatroom);
+
+                chatJoinRepository.deleteByUser_UserIdAndChatroom_ChattingRoomId(userId, roomId);
+            });
+
             // 게시판 테이블에서 먼저 삭제
             secondhandBoardRepository.deleteByPost(post);
             lostBoardRepository.deleteByPost(post);
@@ -307,6 +339,33 @@ public class UserServiceImpl implements UserService {
 
             // 게시글 삭제
             postRepository.delete(post);
+        }
+        // 2. 채팅 참여 기록 삭제 (chat_join)
+        chatJoinRepository.deleteByUser_UserId(userId);
+
+        // 3. 메시지 삭제 (필요한 경우)
+        messageRepository.deleteBySender_UserId(userId);
+
+        // 3. 키워드 삭제
+        keywordRepository.deleteByUser_UserId(userId);
+
+        // 4. 신청자 정보 삭제
+        applicantRepository.deleteByUser_UserId(userId);
+
+        notificationLogRepository.deleteByUser_UserId(userId);
+
+        try {
+            String url = "https://univcert.com/api/v1/clear/" + user.getEmail();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            Map<String, String> body = Map.of("key", univCertApiKey); // 🔐 application.yml에서 주입된 키
+            HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, request, String.class);
+            System.out.println("📨 UnivCert 삭제 응답: " + response.getBody());
+        } catch (Exception e) {
+            System.err.println("❗ UnivCert 인증 삭제 실패: " + e.getMessage());
         }
 
         userRepository.delete(user);
@@ -334,5 +393,4 @@ public class UserServiceImpl implements UserService {
         user.setGoodCount(user.getGoodCount() + 1);
         userRepository.save(user);
     }
-    // 기존 유저 관리 메소드 (수정 없이 유지)
 }
