@@ -13,4 +13,5 @@ public interface KeywordRepository extends JpaRepository<Keyword, Integer> {
     List<Keyword> findByUser_UserId(int userId);
     List<Keyword> findByBoardType(BoardType boardType);
     List<Keyword> findByKeywordTextAndBoardType(String keywordText, BoardType boardType);
+    void deleteByUser_UserId(int userId);
 }

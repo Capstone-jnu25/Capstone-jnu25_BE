@@ -14,5 +14,6 @@ public interface ApplicantRepository extends JpaRepository<Applicant, Integer> {
     long countByPostAndIsAccepted(Post post, boolean isAccepted);
     Page<Applicant> findByPost_PostIdAndPost_BoardType(int postId, BoardType boardType, Pageable pageable);
     boolean existsByPostAndUser(Post post, User user);
+    void deleteByUser_UserId(int userId);
 }
 

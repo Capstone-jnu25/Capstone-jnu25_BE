@@ -11,7 +11,7 @@ public class Chatroom {
     private int chattingRoomId;
 
     @OneToOne
-    @JoinColumn(name = "post_id", nullable = false, unique = true)
+    @JoinColumn(name = "post_id", nullable = true, unique = true)
     private Post post;
 
     @Column(nullable = false, length = 100)
