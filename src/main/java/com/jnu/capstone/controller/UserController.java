@@ -66,21 +66,6 @@ import java.util.Map;
             return ResponseEntity.noContent().build();
         }
 
-
-    //    // 비밀번호 변경 (JWT고려하지 않은 거.)
-    //    @PutMapping("/{userId}/password")
-    //    public ResponseEntity<Void> changePassword(@PathVariable int userId, @RequestBody PasswordChangeRequestDto requestDto) {
-    //        userService.changePassword(userId, requestDto);
-    //        return ResponseEntity.noContent().build();
-    //    }
-
-    //    // 프로필 사진 변경
-    //    @PutMapping("/{userId}/profile")
-    //    public ResponseEntity<String> updateProfilePicture(@PathVariable int userId, @RequestPart("profileImage") MultipartFile file) {
-    //        String imageUrl = userService.updateProfilePicture(userId, file);
-    //        return ResponseEntity.ok(imageUrl);
-    //    }
-
         // 좋아요 버튼
         @PostMapping("/{userId}/good")
         public ResponseEntity<Void> incrementGoodCount(@PathVariable int userId) {
