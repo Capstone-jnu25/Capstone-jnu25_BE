@@ -44,6 +44,12 @@ public class ImageSearchController {
 
             System.out.println("🔥 searchByImage 호출됨");
 
+            // ✅ newImage 로그 추가
+            System.out.println("📥 newImage 수신됨:");
+            System.out.println("📎 파일명: " + newImage.getOriginalFilename());
+            System.out.println("📏 파일 크기: " + newImage.getSize() + " bytes");
+            System.out.println("🧾 ContentType: " + newImage.getContentType());
+
             List<Map<String, Object>> existingPostList = new ArrayList<>();
             List<MultipartFile> existingImages = new ArrayList<>();
 
