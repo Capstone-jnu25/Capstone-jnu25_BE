@@ -1,18 +1,18 @@
 package com.jnu.capstone.service;
 
+import com.jnu.capstone.dto.AiResponseDto;
 import com.jnu.capstone.dto.LostBoardCreateRequestDto;
 import com.jnu.capstone.dto.LostBoardDto;
 import com.jnu.capstone.dto.LostItemMapResponseDto;
-import com.jnu.capstone.entity.BoardType;
-import com.jnu.capstone.entity.LostBoard;
-import com.jnu.capstone.entity.Post;
-import com.jnu.capstone.entity.User;
+import com.jnu.capstone.entity.*;
 import com.jnu.capstone.repository.LostBoardRepository;
+import com.jnu.capstone.repository.PostKeywordRepository;
 import com.jnu.capstone.repository.PostRepository;
 import com.jnu.capstone.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
@@ -30,14 +30,21 @@ public class LostBoardService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private AiRecommendService aiRecommendService;
+
+    @Autowired
+    private PostKeywordRepository postKeywordRepository;
+
+    @Autowired
+    private NotificationService notificationService;
+
 
     @Transactional
-    public void createLostBoard(int userId, LostBoardCreateRequestDto dto) {
+    public int createLostBoard(int userId, LostBoardCreateRequestDto dto) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-//        System.out.println("🔍 isLost 플래그: " + dto.isLost());
-        // 1. Post 먼저 생성 및 저장
         Post post = new Post();
         post.setUser(user);
         post.setCampus(user.getCampus());
@@ -46,11 +53,10 @@ public class LostBoardService {
         post.setBoardType(BoardType.LOST);
         post.setIsDeleted(false);
 
-        post = postRepository.save(post); // 반드시 저장하고 영속 상태로 받아야 함
+        post = postRepository.save(post);
 
-        // 2. LostBoard 생성 후 post 연결
         LostBoard lostBoard = new LostBoard();
-        lostBoard.setPost(post); // 영속 상태의 Post 연결
+        lostBoard.setPost(post);
         lostBoard.setPlace(dto.getPlace());
         lostBoard.setWriteTime(new Date());
         lostBoard.setPhoto(dto.getPhoto());
@@ -58,8 +64,38 @@ public class LostBoardService {
         lostBoard.setLostLatitude(dto.getLostLatitude());
         lostBoard.setLostLongitude(dto.getLostLongitude());
 
-        // 3. LostBoard 저장
         lostBoardRepository.save(lostBoard);
+
+        post.setLostBoard(lostBoard);
+
+        return post.getPostId(); // 👉 postId 반환
+    }
+
+    public AiResponseDto sendToAiServer(int postId, MultipartFile image) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+
+        // ✅ AI 서버 호출 + 키워드 저장 + 알림 전송
+        AiResponseDto aiResponse = aiRecommendService.sendToAiServer(post, image);
+        for (String keyword : aiResponse.getKeywords()) {
+            postKeywordRepository.save(PostKeyword.builder()
+                    .postId(post.getPostId())
+                    .keywordText(keyword)
+                    .build());
+        }
+
+
+        notificationService.notifyUsersByKeywords(
+                aiResponse.getKeywords(),
+                post.getBoardType(),
+                postId
+        );
+
+        System.out.println("photo: " + post.getLostBoard()); // null이면 연관 관계 연결 안 된 거!
+        System.out.println("photo: " + post.getLostBoard().getPhoto()); // NPE 발생 위치
+
+
+        return aiResponse;
     }
 
     public List<LostItemMapResponseDto> getFoundItemsForMap() {

@@ -57,8 +57,8 @@ public class LostBoard {
     public String getPhoto() { return photo; }
     public void setPhoto(String photo) { this.photo = photo; }
 
-    //여기서부터
-    private boolean lost;
+//    //여기서부터
+//    private boolean lost;
 
     public boolean isLost() { return isLost; }
     public void setLost(boolean isLost) { this.isLost = isLost; }

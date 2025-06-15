@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Integer> {
@@ -27,5 +28,12 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
                                                   @Param("keyword") String keyword,
                                                   @Param("boardTypes") List<BoardType> boardTypes,
                                                   Pageable pageable);
+
+    @Query("SELECT p FROM Post p WHERE p.campus.campusId = :campusId AND p.boardType = :boardType ORDER BY p.postId DESC")
+    List<Post> findTop20ByCampusIdAndBoardTypeOrderByPostIdDesc(@Param("campusId") int campusId, @Param("boardType") BoardType boardType);
+
+    @Query("SELECT p FROM Post p JOIN FETCH p.lostBoard WHERE p.postId = :postId")
+    Optional<Post> findWithLostBoardByPostId(@Param("postId") int postId);
+
 
 }

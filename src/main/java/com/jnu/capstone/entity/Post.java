@@ -37,6 +37,12 @@ public class Post {
     @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private GatheringBoard gatheringBoard;
 
+    @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private LostBoard lostBoard;
+
+    @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private SecondhandBoard secondhandBoard;
+
     // Getters and Setters
     public int getPostId() { return postId; }
     public void setPostId(int postId) { this.postId = postId; }
@@ -70,4 +76,27 @@ public class Post {
         this.gatheringBoard = gatheringBoard;
         gatheringBoard.setPost(this); // 양방향 연관관계 설정
     }
+
+    public LostBoard getLostBoard() {
+        return lostBoard;
+    }
+
+    public void setLostBoard(LostBoard lostBoard) {
+        this.lostBoard = lostBoard;
+        if (lostBoard != null) {
+            lostBoard.setPost(this);
+        }
+    }
+
+    public SecondhandBoard getSecondhandBoard() {
+        return secondhandBoard;
+    }
+
+    public void setSecondhandBoard(SecondhandBoard secondhandBoard) {
+        this.secondhandBoard = secondhandBoard;
+        if (secondhandBoard != null) {
+            secondhandBoard.setPost(this);
+        }
+    }
+
 }

@@ -32,6 +32,15 @@ public interface SecondhandBoardRepository extends JpaRepository<SecondhandBoard
     List<SecondhandBoard> searchByCampusAndQuery(@Param("campusId") int campusId,
                                                  @Param("query") String query);
 
+    @Query("SELECT s FROM SecondhandBoard s " +
+            "JOIN FETCH s.post p " +
+            "WHERE p.campus.campusId = :campusId " +
+            "AND p.boardType = 'SECONDHAND' " +
+            "AND p.isDeleted = false " +
+            "ORDER BY p.postId DESC")
+    List<SecondhandBoard> findTop20ByCampusAndBoardTypeOrderByPostDesc(@Param("campusId") int campusId);
+
+
     void deleteByPost(Post post);
 }
 

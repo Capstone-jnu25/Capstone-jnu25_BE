@@ -37,9 +37,14 @@ dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+//	MockMultipartFile에 대한 오류
+//	testImplementation 'org.springframework.boot:spring-boot-starter-test' // ✅ 포함됨
+
+	implementation 'org.springframework.boot:spring-boot-starter-test'
+
 
 	// Lombok (Getter, Setter 간소화)
 	compileOnly 'org.projectlombok:lombok'
@@ -51,6 +56,9 @@ dependencies {
 	implementation 'com.github.in-seo:univcert:master-SNAPSHOT'
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	implementation 'com.cloudinary:cloudinary-http44:1.33.0'
+
 }
 
 tasks.named('test') {

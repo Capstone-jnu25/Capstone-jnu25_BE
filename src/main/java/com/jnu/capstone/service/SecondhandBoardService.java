@@ -1,15 +1,14 @@
 package com.jnu.capstone.service;
 
+import com.jnu.capstone.dto.AiResponseDto;
 import com.jnu.capstone.dto.SecondhandBoardCreateRequestDto;
 import com.jnu.capstone.dto.SecondhandBoardDto;
 import com.jnu.capstone.entity.*;
-import com.jnu.capstone.repository.PostRepository;
-import com.jnu.capstone.repository.SchoolRepository;
-import com.jnu.capstone.repository.SecondhandBoardRepository;
-import com.jnu.capstone.repository.UserRepository;
+import com.jnu.capstone.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // ✅ 추가
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
@@ -30,30 +29,62 @@ public class SecondhandBoardService {
     @Autowired
     private SchoolRepository schoolRepository;
 
-    @Transactional  // ✅ 이거 꼭 추가해 주세요!
-    public void createSecondhandBoard(SecondhandBoardCreateRequestDto dto, int userId) {
+    @Autowired
+    private AiRecommendService aiRecommendService;
+    @Autowired
+    private NotificationService notificationService;
+    @Autowired
+    private PostKeywordRepository postKeywordRepository;
+
+    @Transactional
+    public int createSecondhandBoard(SecondhandBoardCreateRequestDto dto, int userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         School campus = user.getCampus();
 
-        // 1. Post 생성 및 저장
         Post post = new Post();
         post.setTitle(dto.getTitle());
         post.setContents(dto.getContents());
         post.setBoardType(BoardType.SECONDHAND);
         post.setUser(user);
         post.setCampus(campus);
-        post = postRepository.save(post); // 영속성 컨텍스트에 저장됨
+        post = postRepository.save(post);
 
-        // 2. SecondhandBoard 생성
         SecondhandBoard board = new SecondhandBoard();
-        board.setPost(post); // @MapsId: postId도 자동 설정됨
+        board.setPost(post);
         board.setPlace(dto.getPlace());
         board.setWriteTime(new Date());
         board.setPhoto(dto.getPhoto());
         board.setPrice(dto.getPrice());
 
-        secondhandBoardRepository.save(board); // 정상 저장
+        secondhandBoardRepository.save(board);
+
+        return post.getPostId();
+    }
+
+    public AiResponseDto sendToAiServer(int postId, MultipartFile image) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("postId에 해당하는 게시글이 없습니다."));
+
+        // AI 서버 호출
+        AiResponseDto aiResponse = aiRecommendService.sendToAiServer(post, image);
+
+        // 키워드 저장
+        for (String keyword : aiResponse.getKeywords()) {
+            postKeywordRepository.save(PostKeyword.builder()
+                    .postId(postId)
+                    .keywordText(keyword)
+                    .build());
+        }
+
+        // 알림 전송
+        notificationService.notifyUsersByKeywords(
+                aiResponse.getKeywords(),
+                post.getBoardType(),
+                postId
+        );
+
+        return aiResponse;
     }
 
     // 게시글 전체 목록 조회

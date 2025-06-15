@@ -9,8 +9,7 @@ public class LostBoardCreateRequestDto {
     private String title;     // 게시글 제목
     private String contents;  // 상세 설명 추가
 
-
-
+    public LostBoardCreateRequestDto() {}
 
     // Getters and Setters
     public String getPlace() { return place; }

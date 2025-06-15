@@ -1,10 +1,16 @@
 package com.jnu.capstone.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter  // 추가!
 @Entity
 @Table(name = "post_keyword")
-@IdClass(PostKeywordId.class)  // 복합 키 사용
+@IdClass(PostKeywordId.class)
 public class PostKeyword {
 
     @Id
@@ -15,20 +21,4 @@ public class PostKeyword {
     @Column(name = "post_id", nullable = false)
     private int postId;
 
-    // Getters and Setters
-    public String getKeywordText() {
-        return keywordText;
-    }
-
-    public void setKeywordText(String keywordText) {
-        this.keywordText = keywordText;
-    }
-
-    public int getPostId() {
-        return postId;
-    }
-
-    public void setPostId(int postId) {
-        this.postId = postId;
-    }
 }
