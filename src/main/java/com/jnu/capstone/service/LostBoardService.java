@@ -5,10 +5,7 @@ import com.jnu.capstone.dto.LostBoardCreateRequestDto;
 import com.jnu.capstone.dto.LostBoardDto;
 import com.jnu.capstone.dto.LostItemMapResponseDto;
 import com.jnu.capstone.entity.*;
-import com.jnu.capstone.repository.LostBoardRepository;
-import com.jnu.capstone.repository.PostKeywordRepository;
-import com.jnu.capstone.repository.PostRepository;
-import com.jnu.capstone.repository.UserRepository;
+import com.jnu.capstone.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +36,8 @@ public class LostBoardService {
     @Autowired
     private NotificationService notificationService;
 
+    @Autowired
+    private KeywordRepository keywordRepository;
 
     @Transactional
     public int createLostBoard(int userId, LostBoardCreateRequestDto dto) {
@@ -68,7 +67,10 @@ public class LostBoardService {
 
         post.setLostBoard(lostBoard);
 
+
+
         return post.getPostId(); // 👉 postId 반환
+
     }
 
     public AiResponseDto sendToAiServer(int postId, MultipartFile image) {
@@ -77,23 +79,40 @@ public class LostBoardService {
 
         // ✅ AI 서버 호출 + 키워드 저장 + 알림 전송
         AiResponseDto aiResponse = aiRecommendService.sendToAiServer(post, image);
-        for (String keyword : aiResponse.getKeywords()) {
+        List<String> keywords = aiResponse.getKeywords();
+
+        // 1. post_keyword 테이블에 저장
+        for (String keyword : keywords) {
             postKeywordRepository.save(PostKeyword.builder()
                     .postId(post.getPostId())
                     .keywordText(keyword)
                     .build());
         }
 
+        // 2. 분실물 게시글일 경우 → keyword 테이블에도 저장
+        LostBoard lostBoard = post.getLostBoard();
+        if (lostBoard != null && lostBoard.isLost()) {
+            for (String keyword : keywords) {
+                boolean exists = keywordRepository.existsByKeywordTextAndBoardTypeAndUser_UserId(
+                        keyword, BoardType.LOST, post.getUser().getUserId()
+                );
+                if (!exists) {
+                    Keyword newKeyword = Keyword.builder()
+                            .keywordText(keyword)
+                            .boardType(BoardType.LOST)
+                            .user(post.getUser())
+                            .build();
+                    keywordRepository.save(newKeyword);
+                }
+            }
+        }
 
+        // 3. 푸시 알림
         notificationService.notifyUsersByKeywords(
-                aiResponse.getKeywords(),
+                keywords,
                 post.getBoardType(),
                 postId
         );
-
-        System.out.println("photo: " + post.getLostBoard()); // null이면 연관 관계 연결 안 된 거!
-        System.out.println("photo: " + post.getLostBoard().getPhoto()); // NPE 발생 위치
-
 
         return aiResponse;
     }
@@ -199,6 +218,7 @@ public class LostBoardService {
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
+
 
 
 }

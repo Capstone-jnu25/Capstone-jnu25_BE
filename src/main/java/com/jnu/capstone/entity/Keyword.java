@@ -1,8 +1,17 @@
 package com.jnu.capstone.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 
 @Entity
+@Getter
+@NoArgsConstructor // ✅ 기본 생성자 추가
+@AllArgsConstructor
+@Builder
 @Table(name = "keyword")
 public class Keyword {
     @Id
