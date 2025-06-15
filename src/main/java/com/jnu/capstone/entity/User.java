@@ -44,7 +44,7 @@ public class User {
     private boolean emailVerified = false;  // 이메일 인증 여부
 
     @Column(nullable = true, length = 512)
-    private String fcmToken;
+    private String fcmToken = "a";
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts;
 
