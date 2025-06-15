@@ -78,6 +78,13 @@ public class ImageSearchController {
                         });
             }
 
+            System.out.println("📦 existingImages size = " + existingImages.size());
+            for (int i = 0; i < existingImages.size(); i++) {
+                MultipartFile img = existingImages.get(i);
+                System.out.println("🖼️ Image " + (i + 1) + " → name: " + img.getOriginalFilename()
+                        + ", size: " + img.getSize() + " bytes, type: " + img.getContentType());
+            }
+
             if (existingImages.isEmpty()) {
                 return ResponseEntity.badRequest().body(Map.of("message", "기존 이미지가 필요합니다."));
             }
