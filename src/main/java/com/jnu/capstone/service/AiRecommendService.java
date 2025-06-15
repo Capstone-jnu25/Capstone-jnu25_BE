@@ -43,7 +43,12 @@ public class AiRecommendService {
             BoardType boardType = post.getBoardType();
 
             // 1. 기존 게시글 20개 가져오기
-            List<Post> recentPosts = postRepository.findTop20ByCampusIdAndBoardTypeOrderByPostIdDesc(campusId, boardType);
+            List<Post> recentPosts = postRepository
+                    .findTop20ByCampusIdAndBoardTypeOrderByPostIdDesc(campusId, boardType)
+                    .stream()
+                    .filter(p -> p.getPostId() != post.getPostId())  // 🔥 현재 작성 중인 게시글 제외
+                    .limit(20) // 제외하고 다시 20개로 잘라줌
+                    .toList();
 
             // 2. existingPosts JSON 생성
             List<Map<String, Object>> existingPostList = recentPosts.stream().map(p -> {

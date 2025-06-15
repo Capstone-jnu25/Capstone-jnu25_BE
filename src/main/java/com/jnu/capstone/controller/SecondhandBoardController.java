@@ -94,4 +94,18 @@ public class SecondhandBoardController {
 
         return ResponseEntity.ok(Map.of("status", "success", "data", result));
     }
+    @PostMapping("/recommend")
+    public ResponseEntity<?> getRecommendedSecondhandBoards(
+            @RequestHeader("Authorization") String token,
+            @RequestBody Map<String, List<Integer>> requestBody) {
+
+        String jwt = token.replace("Bearer ", "");
+        int userId = jwtTokenProvider.getUserIdFromToken(jwt);
+
+        List<Integer> postIds = requestBody.getOrDefault("postIds", List.of());
+        List<SecondhandBoardDto> boards = secondhandBoardService.getSecondhandBoardDetailsByPostIds(postIds);
+
+        return ResponseEntity.ok(Map.of("status", "success", "data", boards));
+    }
+
 }

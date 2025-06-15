@@ -125,4 +125,20 @@ public class LostBoardController {
                 "data", result
         ));
     }
+
+    // 추천된 postId들로 상세 게시글 목록 반환
+    @PostMapping("/recommend")
+    public ResponseEntity<?> getRecommendedLostBoards(
+            @RequestHeader("Authorization") String token,
+            @RequestBody Map<String, List<Integer>> requestBody) {
+
+        String jwt = token.replace("Bearer ", "");
+        int userId = jwtTokenProvider.getUserIdFromToken(jwt);
+
+        List<Integer> postIds = requestBody.getOrDefault("postIds", List.of());
+        List<LostBoardDto> boards = lostBoardService.getLostBoardDetailsByPostIds(postIds);
+
+        return ResponseEntity.ok(Map.of("status", "success", "data", boards));
+    }
+
 }

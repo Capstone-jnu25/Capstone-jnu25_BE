@@ -194,6 +194,11 @@ public class LostBoardService {
 
     }
 
+    public List<LostBoardDto> getLostBoardDetailsByPostIds(List<Integer> postIds) {
+        return lostBoardRepository.findWithPostByPostIds(postIds).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
 
 
 }

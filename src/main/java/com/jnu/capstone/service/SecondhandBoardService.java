@@ -150,6 +150,11 @@ public class SecondhandBoardService {
                 .collect(Collectors.toList());
     }
 
+    public List<SecondhandBoardDto> getSecondhandBoardDetailsByPostIds(List<Integer> postIds) {
+        return secondhandBoardRepository.findWithPostByPostIds(postIds).stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
 
 
 
