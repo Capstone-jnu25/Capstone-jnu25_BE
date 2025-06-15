@@ -13,6 +13,9 @@ public interface ChatJoinRepository extends JpaRepository<ChatJoin, ChatJoinId> 
     // 특정 유저의 모든 참여 채팅방 조회
     List<ChatJoin> findByUserId(int userId);
     List<ChatJoin> findByChatroom(Chatroom chatroom);
+    void deleteByUser_UserId(int userId);
     // 특정 유저가 특정 채팅방에 참여 중인지 확인
     boolean existsByUserIdAndChattingRoomId(int userId, int chattingRoomId);
+    void deleteByUser_UserIdAndChatroom_ChattingRoomId(int userId, int chattingRoomId);
+
 }

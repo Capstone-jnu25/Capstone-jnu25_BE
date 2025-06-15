@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ApplicantSimpleResponseDto {
     private int applicantId;
+    private int userId;
     private String nickname;
     private boolean isAccepted;
 
@@ -17,6 +18,7 @@ public class ApplicantSimpleResponseDto {
     public static ApplicantSimpleResponseDto fromEntity(Applicant applicant) {
         return new ApplicantSimpleResponseDto(
                 applicant.getApplicantId(),
+                applicant.getUser().getUserId(),
                 applicant.getUser().getNickname(),
                 applicant.isAccepted()
         );

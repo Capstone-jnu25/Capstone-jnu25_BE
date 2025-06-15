@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+    import java.util.List;
 import java.util.Map;
 
 
@@ -128,8 +129,16 @@ import java.util.Map;
             userService.updateFcmToken(userId, requestDto.getFcmToken());
             return ResponseEntity.ok("FCM 토큰이 저장되었습니다.");
         }
-        @GetMapping("/fcm-token")
-        public ResponseEntity<?> getFcmToken(@RequestHeader("Authorization") String tokenHeader) {
+    @GetMapping("/fcm-token")
+    public ResponseEntity<?> getFcmToken(@RequestHeader(value = "Authorization", required = false) String tokenHeader) {
+        if (tokenHeader == null || !tokenHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
+                    "status", "fail",
+                    "message", "Authorization 헤더가 유효하지 않습니다."
+            ));
+        }
+
+        try {
             String token = tokenHeader.replace("Bearer ", "");
             int userId = jwtTokenProvider.getUserIdFromToken(token);
 
@@ -142,6 +151,12 @@ import java.util.Map;
                             "status", "fail",
                             "message", "사용자를 찾을 수 없습니다."
                     )));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
+                    "status", "fail",
+                    "message", "토큰 검증 실패: " + e.getMessage()
+            ));
         }
-
     }
+
+}

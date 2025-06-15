@@ -43,7 +43,7 @@ public class User {
     @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
     private boolean emailVerified = false;  // 이메일 인증 여부
 
-    @Column(nullable = true, length = 255)
+    @Column(nullable = true, length = 512)
     private String fcmToken;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts;

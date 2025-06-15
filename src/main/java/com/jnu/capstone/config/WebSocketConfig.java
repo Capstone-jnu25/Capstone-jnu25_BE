@@ -1,24 +1,22 @@
 package com.jnu.capstone.config;
 
+import com.jnu.capstone.websocket.CustomWebSocketHandler;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.*;
 
 @Configuration
-@EnableWebSocketMessageBroker
-public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+@EnableWebSocket
+public class WebSocketConfig implements WebSocketConfigurer {
 
-    @Override
-    public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // WebSocket 연결 주소: /ws
-        registry.addEndpoint("/ws").setAllowedOriginPatterns("*").withSockJS();
+    private final CustomWebSocketHandler customWebSocketHandler;
+
+    public WebSocketConfig(CustomWebSocketHandler customWebSocketHandler) {
+        this.customWebSocketHandler = customWebSocketHandler;
     }
 
     @Override
-    public void configureMessageBroker(MessageBrokerRegistry registry) {
-        // 클라이언트에서 구독하는 prefix: /topic
-        registry.enableSimpleBroker("/topic");
-        // 메시지 보낼 때 prefix: /app
-        registry.setApplicationDestinationPrefixes("/app");
+    public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
+        registry.addHandler(customWebSocketHandler, "/ws/chat")
+                .setAllowedOrigins("*");
     }
 }

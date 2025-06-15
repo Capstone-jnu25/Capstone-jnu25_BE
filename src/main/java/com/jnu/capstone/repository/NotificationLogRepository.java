@@ -7,4 +7,5 @@ import java.util.List;
 public interface NotificationLogRepository extends JpaRepository<NotificationLog, Long> {
 //    List<NotificationLog> findByUser_UserIdOrderBySentTimeDesc(int userId);
     List<NotificationLog> findByUser_UserId(int userId);
+    void deleteByUser_UserId(int userId);
 }
