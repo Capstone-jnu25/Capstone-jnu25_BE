@@ -42,5 +42,12 @@ public interface SecondhandBoardRepository extends JpaRepository<SecondhandBoard
 
 
     void deleteByPost(Post post);
+
+    @Query("SELECT s FROM SecondhandBoard s " +
+            "JOIN FETCH s.post p " +
+            "JOIN FETCH p.user " +
+            "WHERE p.postId IN :postIds")
+    List<SecondhandBoard> findWithPostByPostIds(@Param("postIds") List<Integer> postIds);
+
 }
 

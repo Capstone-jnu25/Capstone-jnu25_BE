@@ -38,4 +38,11 @@ public interface LostBoardRepository extends JpaRepository<LostBoard, Integer> {
 
 
     void deleteByPost(Post post);
+
+    @Query("SELECT l FROM LostBoard l " +
+            "JOIN FETCH l.post p " +
+            "JOIN FETCH p.user " +
+            "WHERE p.postId IN :postIds")
+    List<LostBoard> findWithPostByPostIds(@Param("postIds") List<Integer> postIds);
+
 }
